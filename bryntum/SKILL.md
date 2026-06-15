@@ -242,6 +242,18 @@ html, body, #root { height: 100%; margin: 0; }
 
 ---
 
+## Widget-first rule
+
+Always use official Bryntum widgets (e.g. `TabPanel`, `Gantt`, `Grid`, form/login widgets) instead of hand-rolling HTML/CSS equivalents. Before implementing any UI pattern, verify whether Bryntum already provides a widget for it via the docs or MCP tool. Custom HTML/CSS is a last resort when no widget exists.
+
+---
+
+## CSS - prefer simplest solution
+
+Prefer the simplest possible CSS-only solution. Avoid JS-based positioning, `position: fixed` hacks, and magic `z-index` values unless explicitly justified. Confirm complexity is truly necessary before adding it — a one-line CSS rule beats a resize observer.
+
+---
+
 ## Clean starter
 
 Render only the Bryntum component with its default theme. Don't add a page header/banner, or custom styling beyond the required CSS imports unless the user asks. Delete scaffold leftovers: default `App.css`/`index.css` content, `HelloWorld.vue`, sample logos/assets. Use one app stylesheet.
@@ -272,6 +284,8 @@ After building:
 
 ## Checklist
 
+- [ ] UI patterns use Bryntum widgets — no hand-rolled HTML/CSS equivalents
+- [ ] CSS solutions are CSS-only; no JS positioning, no `position: fixed` hacks, no unexplained `z-index`
 - [ ] No SASS/SCSS, no legacy single-file theme imports
 - [ ] FontAwesome + structural CSS + theme CSS (in order)
 - [ ] Default theme: `svalbard-light`; default font: Poppins via `.b-widget`
