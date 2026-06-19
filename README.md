@@ -1,6 +1,6 @@
-# Bryntum Skills for Claude Code
+# Bryntum Skills
 
-This repository contains Claude Code skills for working with [Bryntum](https://bryntum.com) components — Scheduler, Scheduler Pro, Gantt, Calendar, Grid, and TaskBoard.
+Agent skills for working with [Bryntum](https://bryntum.com) components — Scheduler, Scheduler Pro, Gantt, Calendar, Grid, and TaskBoard. Compatible with Claude Code and Codex.
 
 ## Skills
 
@@ -28,30 +28,62 @@ Vanilla JS patterns: direct class import from `@bryntum/{product}` and instantia
 
 Backend persistence patterns: CrudManager (Scheduler, Scheduler Pro, Gantt, Calendar, TaskBoard) and AjaxStore (Grid), phantom ID handling, partial sync, and common data gotchas.
 
+### `bryntum-drag-and-drop`
+
+How to implement drag and drop from a grid onto a Scheduler or Gantt.
+
 ---
 
 ## Installation
 
-Copy the skills you need into your `.claude/skills/` folder. At minimum, install `bryntum` plus the skill for your framework.
+Copy the skills you need into your agent's skills folder. At minimum, install `bryntum` plus the skill for your framework.
+
+### Claude Code
+
+Skills live in `.claude/skills/` (project-local). Use `~/.claude/skills/` instead to install them globally for all projects.
 
 **Install all skills at once:**
 
 ```bash
-npx degit bryntum/skills/bryntum ~/.claude/skills/bryntum
-npx degit bryntum/skills/bryntum-react ~/.claude/skills/bryntum-react
-npx degit bryntum/skills/bryntum-angular ~/.claude/skills/bryntum-angular
-npx degit bryntum/skills/bryntum-vue ~/.claude/skills/bryntum-vue
-npx degit bryntum/skills/bryntum-vanilla ~/.claude/skills/bryntum-vanilla
-npx degit bryntum/skills/bryntum-crud ~/.claude/skills/bryntum-crud
+npx degit bryntum/skills/bryntum .claude/skills/bryntum
+npx degit bryntum/skills/bryntum-react .claude/skills/bryntum-react
+npx degit bryntum/skills/bryntum-angular .claude/skills/bryntum-angular
+npx degit bryntum/skills/bryntum-vue .claude/skills/bryntum-vue
+npx degit bryntum/skills/bryntum-vanilla .claude/skills/bryntum-vanilla
+npx degit bryntum/skills/bryntum-crud .claude/skills/bryntum-crud
+npx degit bryntum/skills/bryntum-drag-and-drop .claude/skills/bryntum-drag-and-drop
 ```
 
 **Install individually** (e.g. React only):
 
 ```bash
-npx degit bryntum/skills/bryntum ~/.claude/skills/bryntum
-npx degit bryntum/skills/bryntum-react ~/.claude/skills/bryntum-react
+npx degit bryntum/skills/bryntum .claude/skills/bryntum
+npx degit bryntum/skills/bryntum-react .claude/skills/bryntum-react
+```
+
+### Codex
+
+Skills live in `.agents/skills/` (project-local). Use `~/.agents/skills/` instead to install them globally for all projects.
+
+**Install all skills at once:**
+
+```bash
+npx degit bryntum/skills/bryntum .agents/skills/bryntum
+npx degit bryntum/skills/bryntum-react .agents/skills/bryntum-react
+npx degit bryntum/skills/bryntum-angular .agents/skills/bryntum-angular
+npx degit bryntum/skills/bryntum-vue .agents/skills/bryntum-vue
+npx degit bryntum/skills/bryntum-vanilla .agents/skills/bryntum-vanilla
+npx degit bryntum/skills/bryntum-crud .agents/skills/bryntum-crud
+npx degit bryntum/skills/bryntum-drag-and-drop .agents/skills/bryntum-drag-and-drop
+```
+
+**Install individually** (e.g. React only):
+
+```bash
+npx degit bryntum/skills/bryntum .agents/skills/bryntum
+npx degit bryntum/skills/bryntum-react .agents/skills/bryntum-react
 ```
 
 ## Requirements
 
-- [Claude Code](https://claude.ai/code)
+- [Claude Code](https://claude.ai/code) or [Codex](https://openai.com/codex/)
