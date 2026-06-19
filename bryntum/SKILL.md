@@ -23,6 +23,7 @@ Load the relevant skill, or fetch the raw file directly if the skill is not inst
 | Vue project | `bryntum-vue` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-vue/SKILL.md |
 | Vanilla JS project | `bryntum-vanilla` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-vanilla/SKILL.md |
 | Backend / CRUD / data persistence | `bryntum-crud` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-crud/SKILL.md |
+| Drag from a sidebar/list/grid onto the timeline | `bryntum-drag-and-drop` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-drag-and-drop/SKILL.md |
 
 ---
 
@@ -74,6 +75,8 @@ claude mcp add --transport http bryntum https://mcp.bryntum.com
 
 Fallback: `WebFetch`/`WebSearch` on `bryntum.com/products/{product}/docs/` or `https://bryntum.com/blog/`
 
+> **Using a Bryntum blog post or older example as a model? Check its version first.** Many posts target Bryntum v6 or earlier. Copy the *logic/pattern*, but update the code to the version you're installing (latest v7). The most common v6→v7 break is CSS: v7 normalized class names to **kebab-case** (e.g. `.b-timeline-subgrid` → `.b-timeline-sub-grid`, `.b-buttongroup` → `.b-button-group`). Also watch for deprecated data props (`*Data`) and API changes. Verify class names/APIs against current docs (MCP `search_bryntum_docs` with the right `version`) before shipping. CSS migration ref: `bryntum.com/products/{product}/docs-llm/guide/{Product}/migration/migrate-to-new-css`
+
 ---
 
 ## Products
@@ -93,9 +96,9 @@ Fallback: `WebFetch`/`WebSearch` on `bryntum.com/products/{product}/docs/` or `h
 
 **Trial** (public npm, no auth):
 ```bash
-npm install @bryntum/gantt@npm:@bryntum/gantt-trial@7.2.0
+npm install @bryntum/gantt@npm:@bryntum/gantt-trial
 ```
-Framework wrappers have no `-trial` suffix: `npm install @bryntum/gantt-react@7.2.0`. Use exact versions (no `^`).
+Framework wrappers have no `-trial` suffix: `npm install @bryntum/gantt-react`. Use exact versions (no `^`).
 
 **Licensed**: 
 Bryntum licensed components are hosted in a private Bryntum repository. Follow the private repository access guide: https://bryntum.com/products/schedulerpro/docs/guide/SchedulerPro/npm/repository/private-repository-access
@@ -244,7 +247,16 @@ html, body, #root { height: 100%; margin: 0; }
 
 ## Widget-first rule
 
-Always use official Bryntum widgets (e.g. `TabPanel`, `Gantt`, `Grid`, form/login widgets) instead of hand-rolling HTML/CSS equivalents. Before implementing any UI pattern, verify whether Bryntum already provides a widget for it via the docs or MCP tool. Custom HTML/CSS is a last resort when no widget exists.
+**Never hand-roll HTML/CSS equivalents of UI that a library already provides.** But *which* library depends on where the UI lives:
+
+- **Inside / extending the Bryntum component** (toolbars, the task/event editor, column renderers, context menus, tooltips, in-component buttons/fields) — use **official Bryntum widgets** (e.g. `TabPanel`, `Toolbar`, form fields, the built-in editor) and customize them via config. Verify a Bryntum widget exists via the docs or MCP before doing anything custom. This keeps the Bryntum-owned UI consistent and inside Bryntum's state/render lifecycle.
+- **Outside Bryntum, in the host app** (pages, surrounding layout, app-level modals/dialogs, buttons, nav):
+    - **If the app already uses a component system** (MUI, Chakra, shadcn/ui, Ant Design, etc.) — **prefer those components** so the new UI matches the rest of the app. Don't introduce Bryntum widgets for general app UI here, and don't hand-roll HTML/CSS.
+    - **If the app has no component system** — you can use **Bryntum's own widgets for the app too** (`Button`, form fields, `Popup`, `Toolbar`, `Combo`, date/file pickers, charts, etc.). They give a consistent look matching the Gantt/Scheduler with no extra dependency. See the [Bryntum kitchen-sink demo](https://bryntum.com/products/gantt/examples/kitchen-sink/) for the full widget set.
+
+Custom HTML/CSS is a last resort in either zone — reach for it only when neither Bryntum nor the app's design system provides the piece.
+
+To make the Bryntum component itself blend with a design-system app, start withå a matching theme (e.g. `material3-light`/`material3-dark` for Material UI) rather than restyling widgets by hand.
 
 ---
 
@@ -284,7 +296,7 @@ After building:
 
 ## Checklist
 
-- [ ] UI patterns use Bryntum widgets — no hand-rolled HTML/CSS equivalents
+- [ ] UI patterns use app's component system or Bryntum widgets if none — no hand-rolled HTML/CSS equivalents
 - [ ] CSS solutions are CSS-only; no JS positioning, no `position: fixed` hacks, no unexplained `z-index`
 - [ ] No SASS/SCSS, no legacy single-file theme imports
 - [ ] FontAwesome + structural CSS + theme CSS (in order)
@@ -296,4 +308,3 @@ After building:
 - [ ] React: `useState` for config to handle StrictMode — see `bryntum-react` skill
 - [ ] Angular: new props bound with `[prop]="..."` in template — see `bryntum-angular` skill
 - [ ] TypeScript used unless user asked for plain JS
-- [ ] Dev server started and left running after build

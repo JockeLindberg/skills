@@ -44,6 +44,20 @@ See the CrudManager guide: `https://bryntum.com/products/gantt/docs/guide/Gantt/
 
 **Never combine a `crudManager`/`project` prop with inline data props** — it throws. Pick one approach.
 
+### No backend? Use demo-style static data
+
+When adding a Bryntum component to an app that has **no API**, do NOT reach for CrudManager/AjaxStore — and do not try to fake persistence with localStorage. Follow the Bryntum **demos**: provide example data either inline or from a static `data.json` file loaded at startup.
+
+```jsx
+// inline
+<BryntumScheduler events={seedEvents} resources={seedResources} />
+
+// or load a static JSON file (shape matches the demos: { events: [...], resources: [...] })
+const data = await fetch('/data.json').then(r => r.json());
+```
+
+This gets a working, populated component on screen. If the user actually needs edits to persist across reloads, that requires a backend — wire CrudManager (`loadUrl`/`syncUrl`) as below; don't substitute client-side storage.
+
 ### Phantom IDs
 
 When the backend creates a new record, it must return the mapping from the client-generated `$PhantomId` to the real server ID, for all related records in the same sync response. Missing this causes foreign key mismatches on the next sync.

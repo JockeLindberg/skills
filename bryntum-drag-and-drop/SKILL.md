@@ -1,0 +1,115 @@
+---
+name: bryntum-drag-and-drop
+description: >
+  Drag-and-drop INTO a Bryntum Scheduler / Scheduler Pro / Gantt from an external,
+  non-Bryntum source — e.g. a sidebar list of unscheduled jobs, a plain list of
+  <div>s, a third-party grid (AG Grid), or a Bryntum Grid or other Bryntum component. Use this alongside the `bryntum` skill whenever the user wants to drag items onto the timeline. Trigger on phrases like "drag from sidebar", "drag unscheduled/unplanned tasks", "drag onto
+  the scheduler/timeline", "external drag source", "drag from a list/grid into the
+  scheduler", "DragHelper", or a drop being "rejected"/"not working" from a custom source.
+metadata:
+  tags: bryntum, drag, drop, draghelper, scheduler, schedulerpro, gantt, external-source, grid
+---
+
+## dragging from another Bryntum Grid/store
+
+If the drag source IS a Bryntum Grid/store, use the official store→store demo — that's what the demo `Drag.ts` is built for: https://bryntum.com/products/schedulerpro/examples/drag-from-grid/app.module.js, https://bryntum.com/products/schedulerpro/examples/drag-from-grid/lib/Drag.js
+
+## Dragging from an external (non-Bryntum) source
+
+Core use case: a sidebar/pool of unscheduled jobs that the user drags onto a resource row in the Scheduler.
+
+Use Bryntum's [`DragHelper`](https://bryntum.com/products/schedulerpro/docs/api/Core/helper/DragHelper)** and point it at your OWN DOM elements, reading data from your OWN source. `DragHelper` works with any draggable HTML element — it is not limited to Bryntum stores.
+
+### Minimal pattern
+
+```ts
+import { DragHelper, SchedulerPro } from '@bryntum/schedulerpro';
+
+class JobDragHelper extends DragHelper {
+    static configurable = {
+        callOnFunctions    : true,                 // call onDragStart/onDrag/onDrop methods
+        cloneTarget        : true,                 // drag a visual copy, not the original
+        dropTargetSelector : '.b-timeline-sub-grid', // WHERE you may drop (the scheduler timeline). v7 kebab-case; pre-rename versions used '.b-timeline-subgrid'
+        targetSelector     : '.unscheduled-job'    // WHAT can be dragged (YOUR sidebar element)
+    };
+
+    constructor(config) {
+        super({ outerElement : config.outerElement }); // the container holding your draggable elements
+        this.scheduler = config.scheduler;
+    }
+
+    // Build the drag proxy from YOUR data (look the record up by an id on the element)
+    createProxy(grabbedElement) {
+        const job   = this.getJobFor(grabbedElement);  // your lookup: element id -> your JS record
+        const proxy = document.createElement('div');
+        proxy.classList.add('b-sch-event-wrap', 'b-sch-style-border', 'b-sch-horizontal');
+        proxy.innerHTML = `<div class="b-sch-event"><div class="b-sch-event-content">${job.name}</div></div>`;
+        this.context.job = job;
+        return proxy;
+    }
+
+    onDragStart({ context }) {
+        context.job = this.getJobFor(context.grabbed);
+    }
+
+    // Validate continuously: is there a valid date + resource under the cursor?
+    onDrag({ context }) {
+        const date     = this.scheduler.getDateFromCoordinate(context.newX, 'round', false);
+        const resource = context.target && this.scheduler.resolveResourceRecord(context.target);
+        context.valid    = Boolean(date && resource);
+        context.date     = date;
+        context.resource = resource;
+    }
+
+    // Commit to the Bryntum store on a valid drop
+    async onDrop({ context }) {
+        if (!context.valid) return;
+        const { job, date, resource } = context;
+        await this.scheduler.scheduleEvent({
+            eventRecord    : this.scheduler.eventStore.getById(job.id) ?? { id: job.id, name: job.name, duration: job.duration },
+            startDate      : date,
+            resourceRecord : resource
+        });
+        // remove the job from YOUR source list (state/store/DOM)
+    }
+}
+```
+
+Instantiate after the component exists (in React, inside an effect once you have the instance):
+
+```ts
+const drag = new JobDragHelper({
+    scheduler    : schedulerInstance,
+    outerElement : document.querySelector('.sidebar') // container of your .unscheduled-job elements
+});
+// clean up on unmount: drag.destroy();
+```
+
+### Hook reference
+
+- `targetSelector` — your own draggable elements (any DOM, not a Bryntum store).
+- `dropTargetSelector` — restrict drops to the timeline: `'.b-timeline-sub-grid'` (v7 kebab-case CSS; pre-rename versions used `'.b-timeline-subgrid'`).
+- `createProxy(el)` — build the visual drag proxy from your data; stash the record on `this.context`.
+- `onDragStart` — capture the dragged record into `context`.
+- `onDrag` — per-move validation; set `context.valid`. Use `scheduler.getDateFromCoordinate()` and `scheduler.resolveResourceRecord(context.target)`.
+- `onDrop` — if `context.valid`, commit via `scheduler.scheduleEvent({ eventRecord, startDate, resourceRecord })` (or `assignEventToResource`), then remove the item from your source.
+
+For richer, in-scheduler drag validation also add the `eventDrag` feature's `validatorFn`.
+
+### Full worked example
+
+**Drag from an AG Grid into Bryntum Scheduler Pro** — a complete React + Express implementation of this exact pattern (custom `DragHelper`, proxy sized to duration, role/calendar validation, removal from the source grid, backend sync):
+- Blog: https://bryntum.com/blog/how-to-integrate-a-react-ag-grid-with-a-react-bryntum-scheduler-pro/
+
+The same article also shows keeping the source list in sync with the Bryntum stores via store events (`add`/`remove`/`update`).
+
+> **Version caveat:** that article targets Bryntum **v6**, so its CSS class names are pre-rename (e.g. `.b-timeline-subgrid`). v7 normalized classes to kebab-case (`.b-timeline-sub-grid`, `.b-grid-sub-grid`, `.b-time-axis-sub-grid`, `.b-button-group`, …). Copy the *pattern/logic* from the article but translate any CSS class names to their v7 kebab-case form. See https://bryntum.com/products/schedulerpro/docs-llm/guide/SchedulerPro/migration/migrate-to-new-css.md
+
+### Checklist
+
+- [ ] Source is non-Bryntum DOM → subclass `DragHelper`, don't reuse demo `Drag.ts`
+- [ ] `targetSelector` = your own element; `dropTargetSelector` = the scheduler timeline subgrid (use the v7 class from the body)
+- [ ] `createProxy` builds from your data; record stashed on `context`
+- [ ] `onDrag` sets `context.valid` via `getDateFromCoordinate` + `resolveResourceRecord`
+- [ ] `onDrop` commits with `scheduleEvent`/`assignEventToResource` and removes from source
+- [ ] React/Angular/Vue: instantiate after the instance exists; `destroy()` on unmount
