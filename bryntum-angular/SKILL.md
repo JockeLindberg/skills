@@ -60,6 +60,8 @@ export class AppComponent {
 
 ### Sizing
 
+See the Sizing section of the `bryntum` skill for the general rule. Angular's `app-root` is a block element, so use a flex layout rather than `height: 100%`:
+
 ```css
 html, body { height: 100%; margin: 0; }
 app-root { display: flex; flex: 1 1 100%; flex-direction: column; }

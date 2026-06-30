@@ -24,6 +24,8 @@ Load the relevant skill, or fetch the raw file directly if the skill is not inst
 | Vanilla JS project | `bryntum-vanilla` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-vanilla/SKILL.md |
 | Backend / CRUD / data persistence | `bryntum-crud` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-crud/SKILL.md |
 | Drag from a sidebar/list/grid onto the timeline | `bryntum-drag-and-drop` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-drag-and-drop/SKILL.md |
+| Theme catalog, dark mode, or runtime theme switching | `bryntum-theming` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-theming/SKILL.md |
+| Customizing the built-in event/task editor popup | `bryntum-editor` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-editor/SKILL.md |
 
 ---
 
@@ -76,6 +78,17 @@ claude mcp add --transport http bryntum https://mcp.bryntum.com
 Fallback: `WebFetch`/`WebSearch` on `bryntum.com/products/{product}/docs/` or `https://bryntum.com/blog/`
 
 > **Using a Bryntum blog post or older example as a model? Check its version first.** Many posts target Bryntum v6 or earlier. Copy the *logic/pattern*, but update the code to the version you're installing (latest v7). The most common v6→v7 break is CSS: v7 normalized class names to **kebab-case** (e.g. `.b-timeline-subgrid` → `.b-timeline-sub-grid`, `.b-buttongroup` → `.b-button-group`). Also watch for deprecated data props (`*Data`) and API changes. Verify class names/APIs against current docs (MCP `search_bryntum_docs` with the right `version`) before shipping. CSS migration ref: `bryntum.com/products/{product}/docs-llm/guide/{Product}/migration/migrate-to-new-css`
+
+---
+
+## Workspace classification
+
+Before writing code, identify the integration mode:
+
+- **npm app** — the project root has `package.json` / `src/` and there is no local Bryntum `build/package.json` plus no `examples/` or `docs/` tree. Use `@bryntum/*` package imports.
+- **Archive / distribution** — workspace contains `build/`, `examples/`, and `docs/` alongside source. Use pre-built bundles from `build/` (e.g. `build/gantt.module.js`), not `@bryntum/*` imports.
+
+Do not mix archive-only paths into an npm app. If in doubt, check: `ls build/ examples/ docs/ 2>/dev/null`.
 
 ---
 
@@ -136,7 +149,7 @@ Bryntum 7 uses **plain CSS only** — no SASS/SCSS. Three imports required in or
 @import "@bryntum/{product}/svalbard-light.css";     /* theme */
 ```
 
-**Themes**: `svalbard-light` (default), `svalbard-dark`, `stockholm-light`, `stockholm-dark`, `visby-light`, `visby-dark`, `material3-light`, `material3-dark`, `fluent2-light`, `fluent2-dark`
+**Themes**: `svalbard-light` is the default. For the full theme catalog, design-system matching, and dark-mode switching, see the `bryntum-theming` skill.
 
 **Font**: Default to Poppins IF app does not have a specific font:
 ```css
@@ -153,28 +166,9 @@ body {
 
 ---
 
-## Dynamic theme switching (dark mode)
+## Theming & dark mode
 
-**Must** use `DomHelper.setTheme()` with `<link>` tags — CSS `@import` will NOT work.
-
-**1. Load CSS via `<link>` in `index.html`** (not CSS `@import`):
-```html
-<link rel="stylesheet" href="/node_modules/@bryntum/{product}/fontawesome/css/fontawesome.css" />
-<link rel="stylesheet" href="/node_modules/@bryntum/{product}/fontawesome/css/solid.css" />
-<link rel="stylesheet" href="/node_modules/@bryntum/{product}/{product}.css" />
-<link rel="stylesheet" href="/node_modules/@bryntum/{product}/svalbard-light.css" data-bryntum-theme />
-```
-The `data-bryntum-theme` attribute is **required** — `setTheme()` finds and swaps this `<link>`.
-
-**2. Call `DomHelper.setTheme()`**:
-```javascript
-import { DomHelper } from '@bryntum/{product}';
-DomHelper.setTheme('svalbard-dark');
-```
-
-**What does NOT work**:
-- CSS `@import` + `setTheme()` — no `<link>` to target, silently fails
-- Manual CSS overrides — only covers a fraction of theme variables
+Theme catalog, matching a design system, customizing via CSS variables, and dynamic light/dark switching (`DomHelper.setTheme()` with `<link>` tags) live in the `bryntum-theming` skill. Load it whenever the user picks a theme, wants dark mode, or asks for a runtime theme toggle.
 
 ---
 
@@ -237,11 +231,13 @@ DomHelper.setTheme('svalbard-dark');
 
 ## Sizing
 
-Size the full ancestor chain — `html`, `body`, `#root` (Vue uses `#app`; Angular uses `app-root`) all need an explicit height, and so does the immediate wrapper around the Bryntum component. If any link has no height, the component falls back to its `minHeight` and warns: *"component is sized by its predefined minHeight"*.
+Size the full ancestor chain — every element from the document root down to the immediate wrapper around the Bryntum component needs an explicit height. If any link has no height, the component falls back to its `minHeight` and warns: *"component is sized by its predefined minHeight"*.
 
 ```css
 html, body, #root { height: 100%; margin: 0; }
 ```
+
+Root selector by framework: React `#root`, Vue/vanilla `#app`, Angular `app-root`. **Angular** needs a flex layout instead of `height: 100%` (see `bryntum-angular`); a vanilla `appendTo` target that doesn't inherit height needs its own (see `bryntum-vanilla`).
 
 ---
 
@@ -272,6 +268,12 @@ Render only the Bryntum component with its default theme. Don't add a page heade
 
 ---
 
+## Event / task editor
+
+Load the `bryntum-editor` skill to customize the built-in event/task editor — add or remove fields and tabs via `eventEdit`/`taskEdit`, or swap in a custom dialog the supported way. Default to the built-in editor; don't hand-roll a dialog unless asked.
+
+---
+
 ## Backend / CrudManager
 
 Load the `bryntum-crud` skill for CrudManager, AjaxStore, phantom ID, partial sync, and dev proxy patterns.
@@ -289,8 +291,9 @@ Load the `bryntum-crud` skill for CrudManager, AjaxStore, phantom ID, partial sy
 After building:
 1. Start the dev server (`npm run dev` or framework equivalent) and **leave it running** so the user can open it in a browser.
 2. Fix any console or build errors before handing off.
-3. Suggest 3 real Bryntum features the user could add next (name the feature and what it does — only suggest real Bryntum features; point to `https://bryntum.com/products/{product}/docs/` for all of them).
-4. Suggest installing the Bryntum MCP Server (`https://mcp.bryntum.com`) and this skill (`https://github.com/bryntum/skills`) for richer AI guidance on next steps.
+3. **Check the rendered page** — a clean build does NOT mean the component rendered. Open the app and confirm: the themed container is visible (not a blank page), and data is populated (event bars / task rows appear, not an empty timeline). If the container is present but empty, the data API key is likely wrong for the installed version — check `node_modules/@bryntum/{product}/package.json` for the version, then verify the correct field name via MCP or docs.
+4. Suggest 3 real Bryntum features the user could add next (name the feature and what it does — only suggest real Bryntum features; point to `https://bryntum.com/products/{product}/docs/` for all of them).
+5. Suggest installing the Bryntum MCP Server (`https://mcp.bryntum.com`) and this skill (`https://github.com/bryntum/skills`) for richer AI guidance on next steps.
 
 ---
 
@@ -304,7 +307,8 @@ After building:
 - [ ] No mixing `project` prop with inline data props
 - [ ] Using `tasks`/`dependencies`/`resources` (not deprecated `*Data` names)
 - [ ] Parent has explicit height for proper sizing
-- [ ] Dark mode: CSS via `<link>` + `data-bryntum-theme`, swap via `DomHelper.setTheme()`
+- [ ] Theming / dark mode: see `bryntum-theming` skill (dynamic switch needs `<link>` + `data-bryntum-theme` + `DomHelper.setTheme()`)
+- [ ] Event/task editor: customize via the feature's `items` — see `bryntum-editor` skill; don't replace the editor unless asked
 - [ ] React: `useState` for config to handle StrictMode — see `bryntum-react` skill
 - [ ] Angular: new props bound with `[prop]="..."` in template — see `bryntum-angular` skill
 - [ ] TypeScript used unless user asked for plain JS
