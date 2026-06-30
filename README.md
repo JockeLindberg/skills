@@ -32,6 +32,14 @@ Backend persistence patterns: CrudManager (Scheduler, Scheduler Pro, Gantt, Cale
 
 How to implement drag and drop from a grid onto a Scheduler or Gantt.
 
+### `bryntum-theming`
+
+Theme catalog, choosing a theme to match the host app (Material / Fluent), and dynamic light/dark switching via `DomHelper.setTheme()`.
+
+### `bryntum-editor`
+
+Customizing the built-in event/task editor — adding/removing fields and tabs via `eventEdit`/`taskEdit`, and the supported way to swap in a fully custom dialog.
+
 ---
 
 ## Installation
@@ -52,6 +60,8 @@ npx degit bryntum/skills/bryntum-vue .claude/skills/bryntum-vue
 npx degit bryntum/skills/bryntum-vanilla .claude/skills/bryntum-vanilla
 npx degit bryntum/skills/bryntum-crud .claude/skills/bryntum-crud
 npx degit bryntum/skills/bryntum-drag-and-drop .claude/skills/bryntum-drag-and-drop
+npx degit bryntum/skills/bryntum-theming .claude/skills/bryntum-theming
+npx degit bryntum/skills/bryntum-editor .claude/skills/bryntum-editor
 ```
 
 **Install individually** (e.g. React only):
@@ -75,6 +85,8 @@ npx degit bryntum/skills/bryntum-vue .agents/skills/bryntum-vue
 npx degit bryntum/skills/bryntum-vanilla .agents/skills/bryntum-vanilla
 npx degit bryntum/skills/bryntum-crud .agents/skills/bryntum-crud
 npx degit bryntum/skills/bryntum-drag-and-drop .agents/skills/bryntum-drag-and-drop
+npx degit bryntum/skills/bryntum-theming .agents/skills/bryntum-theming
+npx degit bryntum/skills/bryntum-editor .agents/skills/bryntum-editor
 ```
 
 **Install individually** (e.g. React only):

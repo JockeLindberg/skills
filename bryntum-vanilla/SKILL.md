@@ -48,8 +48,4 @@ Import in the app's entry stylesheet — same order as all other frameworks:
 
 ### Sizing
 
-```css
-html, body, #app { height: 100%; margin: 0; }
-```
-
-The `appendTo` target element also needs an explicit height if it does not inherit from `#app`.
+See the Sizing section of the `bryntum` skill — vanilla scaffolds use `#app`. Note: the `appendTo` target element also needs an explicit height if it does not inherit from `#app`.

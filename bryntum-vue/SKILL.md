@@ -61,8 +61,4 @@ const ganttConfig: BryntumGanttProps = {
 
 ### Sizing
 
-Vue Vite scaffolds use `#app` (not `#root`):
-
-```css
-html, body, #app { height: 100%; margin: 0; }
-```
+See the Sizing section of the `bryntum` skill — Vue Vite scaffolds use `#app` (not `#root`).
