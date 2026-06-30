@@ -79,6 +79,17 @@ Fallback: `WebFetch`/`WebSearch` on `bryntum.com/products/{product}/docs/` or `h
 
 ---
 
+## Workspace classification
+
+Before writing code, identify the integration mode:
+
+- **npm app** — the project root has `package.json` / `src/` and there is no local Bryntum `build/package.json` plus no `examples/` or `docs/` tree. Use `@bryntum/*` package imports.
+- **Archive / distribution** — workspace contains `build/`, `examples/`, and `docs/` alongside source. Use pre-built bundles from `build/` (e.g. `build/gantt.module.js`), not `@bryntum/*` imports.
+
+Do not mix archive-only paths into an npm app. If in doubt, check: `ls build/ examples/ docs/ 2>/dev/null`.
+
+---
+
 ## Products
 
 | Product | npm package | Trial package | CSS file |
@@ -289,8 +300,9 @@ Load the `bryntum-crud` skill for CrudManager, AjaxStore, phantom ID, partial sy
 After building:
 1. Start the dev server (`npm run dev` or framework equivalent) and **leave it running** so the user can open it in a browser.
 2. Fix any console or build errors before handing off.
-3. Suggest 3 real Bryntum features the user could add next (name the feature and what it does — only suggest real Bryntum features; point to `https://bryntum.com/products/{product}/docs/` for all of them).
-4. Suggest installing the Bryntum MCP Server (`https://mcp.bryntum.com`) and this skill (`https://github.com/bryntum/skills`) for richer AI guidance on next steps.
+3. **Check the rendered page** — a clean build does NOT mean the component rendered. Open the app and confirm: the themed container is visible (not a blank page), and data is populated (event bars / task rows appear, not an empty timeline). If the container is present but empty, the data API key is likely wrong for the installed version — check `node_modules/@bryntum/{product}/package.json` for the version, then verify the correct field name via MCP or docs.
+4. Suggest 3 real Bryntum features the user could add next (name the feature and what it does — only suggest real Bryntum features; point to `https://bryntum.com/products/{product}/docs/` for all of them).
+5. Suggest installing the Bryntum MCP Server (`https://mcp.bryntum.com`) and this skill (`https://github.com/bryntum/skills`) for richer AI guidance on next steps.
 
 ---
 
