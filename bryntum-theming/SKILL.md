@@ -58,9 +58,6 @@ DomHelper.setTheme('svalbard-dark');
 
 ---
 
-## Checklist
+## Related
 
-- [ ] Structural `{product}.css` imported alongside the theme file
-- [ ] Design-system app: start from the matching theme (`material3-*`, `fluent2-*`), don't restyle by hand
-- [ ] Dark mode: CSS via `<link>` + `data-bryntum-theme`, swap via `DomHelper.setTheme()` (never `@import`)
-- [ ] Customize via CSS variables, not per-class overrides
+Customizing what's rendered *inside* event bars (`eventRenderer`, multi-line layouts, event bar padding) is the `bryntum-styling` skill — theming only picks the look of the whole component.

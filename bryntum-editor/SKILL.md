@@ -1,13 +1,11 @@
 ---
 name: bryntum-editor
 description: >
-  Customize Bryntum's built-in event/task editor — the popup shown when you create or
-  double-click an event/task — across any product (Scheduler, Scheduler Pro, Gantt, Calendar,
-  TaskBoard). Use alongside the `bryntum` skill whenever the user wants to add, remove, or
-  reorder editor fields or tabs, tweak validation, react to the editor opening/saving, or
-  replace the popup with a fully custom dialog. Trigger on phrases like "edit event popup",
-  "task editor", "remove the % Complete field", "add a field to the editor", "custom event
-  editor", "eventEdit"/"taskEdit" config, or "beforeEventEdit"/"beforeTaskEdit".
+  Customize Bryntum's built-in event/task editor popup (all products except Grid). Use alongside the
+  `bryntum` skill to add, remove, or reorder editor fields and tabs, tweak validation, react
+  to the editor opening/saving, or swap in a fully custom dialog. Trigger on phrases like
+  "edit event popup", "task editor", "remove the % Complete field", "custom event editor",
+  "eventEdit"/"taskEdit" config, or "beforeEventEdit"/"beforeTaskEdit".
 metadata:
   tags: bryntum, editor, eventedit, taskedit, popup, scheduler, gantt
 ---
@@ -65,7 +63,7 @@ Keep the feature **ENABLED** and return `false` from `beforeEventEdit` / `before
 
 **Do NOT set the feature to `false`** — that removes the hook entirely (silent no-op). Write changes back via `eventRecord.set({...})` so the stores stay in sync.
 
-Bootstrap example:
+Framework-neutral example (a native `<dialog>`; the same contract applies to a React/Vue/Angular dialog component):
 
 ```js
 let editingRecord = null;
@@ -73,16 +71,12 @@ let editingRecord = null;
 const scheduler = new Scheduler({
     listeners : {
         beforeEventEdit({ eventRecord }) {
-            // Show custom editor
-            $('#customEditor').modal('show');
-
-            // Fill its fields
-            $('#home').val(eventRecord.resources[0].id);
-            $('#away').val(eventRecord.resources[1].id);
-            $('#startDate').val(DateHelper.format(eventRecord.startDate, 'YYYY-MM-DD'));
-            // ...
-
             editingRecord = eventRecord;
+
+            // Fill and show your own dialog
+            nameField.value  = eventRecord.name;
+            startField.value = DateHelper.format(eventRecord.startDate, 'YYYY-MM-DD');
+            dialog.showModal();
 
             // Prevent built-in editor
             return false;
@@ -90,29 +84,17 @@ const scheduler = new Scheduler({
     }
 });
 
-// When clicking save in the custom editor
-$('#save').on('click', () => {
-    const
-        home = $('#home').val(),
-        away = $('#away').val(),
-        date = $('#startDate').val();
-        // ...
-
+// When clicking save in the custom dialog
+saveButton.addEventListener('click', () => {
     // Update record — keeps the stores in sync
     editingRecord.set({
-        startDate : DateHelper.parse(date, 'YYYY-MM-DD'),
-        resources : [away, home]
+        name      : nameField.value,
+        startDate : DateHelper.parse(startField.value, 'YYYY-MM-DD')
     });
+    dialog.close();
 });
 ```
 
-In a framework, instantiate/show your dialog from the listener and commit on save the same way — the `beforeEventEdit`/`beforeTaskEdit` → `record.set()` contract is identical.
+In a framework, show your dialog component from the listener and commit on save the same way — the `beforeEventEdit`/`beforeTaskEdit` → `record.set()` contract is identical.
 
----
-
-## Checklist
-
-- [ ] Customize via the editor feature's `items` (object notation) before considering a custom dialog
-- [ ] Right feature for the product: `eventEdit` (Scheduler / Calendar) vs `taskEdit` (Scheduler Pro / Gantt / Task Board)
-- [ ] Custom dialog: feature stays ENABLED, `beforeEventEdit`/`beforeTaskEdit` returns `false`, writes back via `record.set()`
-- [ ] Never set the feature to `false` to get a custom dialog — that kills the hook
+**Lifecycle note:** when you return `false`, your app owns the record lifecycle — for a newly drag-created event, remove it from the store if the user cancels the dialog (the built-in editor would have done this).

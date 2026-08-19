@@ -6,7 +6,7 @@ Agent skills for working with [Bryntum](https://bryntum.com) components — Sche
 
 ### `bryntum` _(required)_
 
-The core skill. Covers product identification, CSS setup, official demo mirroring, docs lookup via MCP, product-specific component defaults, sizing, dark mode, and data loading rules. Always install this one — the framework and CRUD skills build on it.
+The core skill. Covers workspace and product identification, package installation and CSS styling, docs lookup via MCP, data loading rules, product-specific component defaults, sizing, and output verification. Always install this one — the framework and CRUD skills build on it.
 
 ### `bryntum-react`
 
@@ -36,6 +36,10 @@ How to implement drag and drop from a grid onto a Scheduler or Gantt.
 
 Theme catalog, choosing a theme to match the host app (Material / Fluent), and dynamic light/dark switching via `DomHelper.setTheme()`.
 
+### `bryntum-styling`
+
+Custom event bar styling for Scheduler / Scheduler Pro: `eventRenderer` layouts, event bar DOM structure, padding CSS variables, sticky content, and a worked two-line layout example.
+
 ### `bryntum-editor`
 
 Customizing the built-in event/task editor — adding/removing fields and tabs via `eventEdit`/`taskEdit`, and the supported way to swap in a fully custom dialog.
@@ -61,6 +65,7 @@ npx degit bryntum/skills/bryntum-vanilla .claude/skills/bryntum-vanilla
 npx degit bryntum/skills/bryntum-crud .claude/skills/bryntum-crud
 npx degit bryntum/skills/bryntum-drag-and-drop .claude/skills/bryntum-drag-and-drop
 npx degit bryntum/skills/bryntum-theming .claude/skills/bryntum-theming
+npx degit bryntum/skills/bryntum-styling .claude/skills/bryntum-styling
 npx degit bryntum/skills/bryntum-editor .claude/skills/bryntum-editor
 ```
 
@@ -86,6 +91,7 @@ npx degit bryntum/skills/bryntum-vanilla .agents/skills/bryntum-vanilla
 npx degit bryntum/skills/bryntum-crud .agents/skills/bryntum-crud
 npx degit bryntum/skills/bryntum-drag-and-drop .agents/skills/bryntum-drag-and-drop
 npx degit bryntum/skills/bryntum-theming .agents/skills/bryntum-theming
+npx degit bryntum/skills/bryntum-styling .agents/skills/bryntum-styling
 npx degit bryntum/skills/bryntum-editor .agents/skills/bryntum-editor
 ```
 
