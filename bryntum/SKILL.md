@@ -23,6 +23,7 @@ Load the relevant skill, or fetch the raw file directly if the skill is not inst
 | Backend / CRUD / data persistence | `bryntum-crud` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-crud/SKILL.md |
 | Drag from a sidebar/list/grid onto the timeline | `bryntum-drag-and-drop` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-drag-and-drop/SKILL.md |
 | Theme catalog, dark mode, or runtime theme switching | `bryntum-theming` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-theming/SKILL.md |
+| Custom event bar content / `eventRenderer` layouts | `bryntum-styling` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-styling/SKILL.md |
 | Customizing the built-in event/task editor popup | `bryntum-editor` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-editor/SKILL.md |
 
 ---
@@ -218,6 +219,28 @@ body {
 - Put `tasks`/`resources`/`assignments` inside a single `project` config — never the deprecated `tasksData`/`resourcesData`.
 - Each task needs at least `id`, `name`, and a `columnField` value matching a column `id`.
 - TaskBoard has **no time axis** — tasks don't need `startDate`/`endDate`.
+
+---
+
+## Event bar content & styling (Scheduler / Scheduler Pro)
+
+The DOM structure of an event bar:
+
+```html
+<div class="b-sch-event-wrap">      <!-- renderData.wrapperCls classes land here -->
+    <div class="b-sch-event">       <!-- renderData.cls classes land here -->
+        <div class="b-sch-event-content">
+            <!-- eventRenderer output goes here -->
+        </div>
+    </div>
+</div>
+```
+
+- `.b-sch-event-content` already has built-in padding — don't add your own. Adjust it via CSS variable on the wrapper: `--b-sch-event-padding-inline` (horizontal mode) / `--b-sch-event-padding-block` (vertical mode), e.g. `.b-sch-event-wrap { --b-sch-event-padding-inline: 1em; }`.
+- Event content is **sticky** by default (kept in view while scrolling the time axis), so it does NOT stretch to fill the bar. For custom layouts that should fill the bar (multi-line, stacked), disable it: `features: { stickyEvents: false }`.
+- `eventRenderer({ eventRecord, renderData })` can return a DOM config array for multi-line layouts (flex-column `.b-sch-event-content`). If you render the icon in your own markup, set `renderData.iconCls = null` to suppress the default icon.
+
+For a full worked example (two-line event bar layout with the matching CSS), load the `bryntum-styling` skill.
 
 ---
 

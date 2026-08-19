@@ -55,3 +55,9 @@ DomHelper.setTheme('svalbard-dark');
 **What does NOT work**:
 - CSS `@import` + `setTheme()` — no `<link>` to target, silently fails
 - Manual CSS overrides — only covers a fraction of theme variables
+
+---
+
+## Related
+
+Customizing what's rendered *inside* event bars (`eventRenderer`, multi-line layouts, event bar padding) is the `bryntum-styling` skill — theming only picks the look of the whole component.
