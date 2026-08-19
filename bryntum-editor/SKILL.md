@@ -1,7 +1,7 @@
 ---
 name: bryntum-editor
 description: >
-  Customize Bryntum's built-in event/task editor popup (Grid does not have). Use alongside the
+  Customize Bryntum's built-in event/task editor popup (all products except Grid). Use alongside the
   `bryntum` skill to add, remove, or reorder editor fields and tabs, tweak validation, react
   to the editor opening/saving, or swap in a fully custom dialog. Trigger on phrases like
   "edit event popup", "task editor", "remove the % Complete field", "custom event editor",
@@ -96,3 +96,5 @@ saveButton.addEventListener('click', () => {
 ```
 
 In a framework, show your dialog component from the listener and commit on save the same way — the `beforeEventEdit`/`beforeTaskEdit` → `record.set()` contract is identical.
+
+**Lifecycle note:** when you return `false`, your app owns the record lifecycle — for a newly drag-created event, remove it from the store if the user cancels the dialog (the built-in editor would have done this).
