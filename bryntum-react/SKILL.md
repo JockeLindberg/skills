@@ -23,18 +23,11 @@ Framework wrapper package: `@bryntum/{product}-react`
 
 ### Component
 
-```jsx
-import { BryntumGantt } from '@bryntum/gantt-react';
-
-const App = () => {
-    const [ganttProps] = useState(useGanttProps());
-    return <BryntumGantt {...ganttProps} />;
-};
-```
-
 Pass all config as JSX props. Use `useRef` for instance access:
 
 ```jsx
+import { BryntumGantt } from '@bryntum/gantt-react';
+
 const ganttRef = useRef(null);
 // access instance: ganttRef.current.instance
 <BryntumGantt ref={ganttRef} {...ganttProps} />
@@ -42,11 +35,14 @@ const ganttRef = useRef(null);
 
 ### StrictMode (React 18+)
 
-React StrictMode double-mounts in dev (mount → unmount → mount). Use `useState` for config — it preserves the config object across the remount cycle, avoiding side effects that need cleanup:
+React StrictMode double-mounts in dev (mount → unmount → mount). Bryntum configuration that needs to adapt depending on the component's state or props should be encapsulated in the component using the React `useState` hook to maintain reference across re-renders, prevent unnecessary calculations, and avoids side effects that need cleanup:
 
 ```javascript
 const App = () => {
-    const [ganttProps] = useState(useGanttProps());
+        const [ganttProps] = useState({
+        startDate: start
+        // Bryntum Gantt config options
+    })
     return <BryntumGantt {...ganttProps} />;
 };
 

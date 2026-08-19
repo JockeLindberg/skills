@@ -55,12 +55,3 @@ DomHelper.setTheme('svalbard-dark');
 **What does NOT work**:
 - CSS `@import` + `setTheme()` — no `<link>` to target, silently fails
 - Manual CSS overrides — only covers a fraction of theme variables
-
----
-
-## Checklist
-
-- [ ] Structural `{product}.css` imported alongside the theme file
-- [ ] Design-system app: start from the matching theme (`material3-*`, `fluent2-*`), don't restyle by hand
-- [ ] Dark mode: CSS via `<link>` + `data-bryntum-theme`, swap via `DomHelper.setTheme()` (never `@import`)
-- [ ] Customize via CSS variables, not per-class overrides

@@ -6,7 +6,7 @@ Agent skills for working with [Bryntum](https://bryntum.com) components — Sche
 
 ### `bryntum` _(required)_
 
-The core skill. Covers product identification, CSS setup, official demo mirroring, docs lookup via MCP, product-specific component defaults, sizing, dark mode, and data loading rules. Always install this one — the framework and CRUD skills build on it.
+The core skill. Covers workspace and product identification, package installation and CSS styling, docs lookup via MCP, data loading rules, product-specific component defaults, sizing, and output verification. Always install this one — the framework and CRUD skills build on it.
 
 ### `bryntum-react`
 

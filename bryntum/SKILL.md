@@ -1,13 +1,11 @@
 ---
 name: bryntum
 description: >
-  Build and integrate Bryntum components into web apps. Use this skill whenever the user is working with
-  any Bryntum product — Scheduler, Scheduler Pro, Gantt, Calendar, Grid, or TaskBoard — regardless of
-  whether they mention "Bryntum" by name. Trigger on phrases like "add a scheduler", "set up a gantt chart",
-  "integrate a grid component", "calendar view", "task board", "resource scheduling", or any mention of
-  @bryntum/* npm packages. Also trigger when the user asks about Bryntum CSS imports, themes, or
-  framework wrappers (Angular, React, Vue). When in doubt, use this skill — it's better to consult it
-  unnecessarily than to miss a Bryntum-specific rule and produce broken code.
+  Build and integrate Bryntum components — Scheduler, Scheduler Pro, Gantt, Calendar, Grid,
+  TaskBoard — even when "Bryntum" isn't mentioned by name. Trigger on phrases like "add a
+  scheduler", "gantt chart", "grid component", "calendar view", "task board", "resource
+  scheduling", any mention of @bryntum/* npm packages, or questions about Bryntum CSS imports,
+  themes, or framework wrappers (Angular, React, Vue). When in doubt, use this skill.
 metadata:
   tags: bryntum, scheduler, gantt, calendar, grid, taskboard, schedulerpro
 ---
@@ -166,12 +164,6 @@ body {
 
 ---
 
-## Theming & dark mode
-
-Theme catalog, matching a design system, customizing via CSS variables, and dynamic light/dark switching (`DomHelper.setTheme()` with `<link>` tags) live in the `bryntum-theming` skill. Load it whenever the user picks a theme, wants dark mode, or asks for a runtime theme toggle.
-
----
-
 ## Data loading
 
 **Never mix `project` prop with inline data props** — throws an error. Pick one:
@@ -194,8 +186,8 @@ Theme catalog, matching a design system, customizing via CSS variables, and dyna
 ## Product-specific component defaults
 
 ### Grid
-- `columns` array with 3–5 columns: set `text`, `field`, `type` (`"number"`, `"date"`, `"check"`, `"percent"`, `"tree"`). Add `editor: { type: "textfield", required: true }` for required input. DateColumn needs actual `Date` objects, not strings.
-- `data` array with 10–20 rows matching column `field`s. Pass via `data` prop (not legacy `dataset`).
+- `columns` array: set `text`, `field`, `type` (`"number"`, `"date"`, `"check"`, `"percent"`, `"tree"`). Add `editor: { type: "textfield", required: true }` for required input. DateColumn needs actual `Date` objects, not strings.
+- `data` array with seed rows matching column `field`s. Pass via `data` prop (not legacy `dataset`).
 - `features: { sort: true, filterBar: true, cellEdit: true }` for sensible interactivity.
 - Grid has **no CrudManager** — use AjaxStore for backend. See the `bryntum-crud` skill.
 
@@ -208,12 +200,12 @@ Theme catalog, matching a design system, customizing via CSS variables, and dyna
 ### Scheduler Pro
 - `viewPreset: "hourAndDay"`, `barMargin`, `columns` with `name` column.
 - Put `events`/`resources`/`assignments`/`dependencies` on a **separate ProjectModel** referenced via `project` prop.
-- Events have `startDate` + `duration` (`endDate` is derived). Wire dependencies as a finish-to-start chain — give only the first event a `startDate`, let dependencies cascade the rest. Aim for 4–6 events in a visible diagonal.
+- Events have `startDate` + `duration` (`endDate` is derived). Wire dependencies as a finish-to-start chain — give only the first event a `startDate`, let dependencies cascade the rest so the schedule lays out visibly.
 
 ### Gantt
 - `viewPreset: "weekAndDayLetter"`, `barMargin`, `name` column.
 - Put `tasks`/`dependencies`/`resources`/`assignments` on a **separate ProjectModel** referenced via `project` prop.
-- Wire dependencies as a finish-to-start chain — give only the first task a `startDate`, let dependencies cascade. Aim for 4–6 tasks.
+- Wire dependencies as a finish-to-start chain — give only the first task a `startDate`, let dependencies cascade so the schedule lays out visibly.
 
 ### Calendar
 - `mode: "week"` (options: `"day"`, `"month"`, `"year"`, `"agenda"`), `date` near the seed data.
@@ -252,7 +244,7 @@ Root selector by framework: React `#root`, Vue/vanilla `#app`, Angular `app-root
 
 Custom HTML/CSS is a last resort in either zone — reach for it only when neither Bryntum nor the app's design system provides the piece.
 
-To make the Bryntum component itself blend with a design-system app, start withå a matching theme (e.g. `material3-light`/`material3-dark` for Material UI) rather than restyling widgets by hand.
+To make the Bryntum component itself blend with a design-system app, start with a matching theme (e.g. `material3-light`/`material3-dark` for Material UI) rather than restyling widgets by hand.
 
 ---
 
@@ -264,19 +256,7 @@ Prefer the simplest possible CSS-only solution. Avoid JS-based positioning, `pos
 
 ## Clean starter
 
-Render only the Bryntum component with its default theme. Don't add a page header/banner, or custom styling beyond the required CSS imports unless the user asks. Delete scaffold leftovers: default `App.css`/`index.css` content, `HelloWorld.vue`, sample logos/assets. Use one app stylesheet.
-
----
-
-## Event / task editor
-
-Load the `bryntum-editor` skill to customize the built-in event/task editor — add or remove fields and tabs via `eventEdit`/`taskEdit`, or swap in a custom dialog the supported way. Default to the built-in editor; don't hand-roll a dialog unless asked.
-
----
-
-## Backend / CrudManager
-
-Load the `bryntum-crud` skill for CrudManager, AjaxStore, phantom ID, partial sync, and dev proxy patterns.
+Render only the Bryntum component with its default theme. Don't add a page header/banner, or custom styling beyond the required CSS imports unless the user asks. Delete scaffold leftovers: default `App.css`/`index.css` content, `HelloWorld.vue`, sample logos/assets. Use one app stylesheet. Use TypeScript unless the user asked for plain JS.
 
 ---
 
@@ -294,21 +274,3 @@ After building:
 3. **Check the rendered page** — a clean build does NOT mean the component rendered. Open the app and confirm: the themed container is visible (not a blank page), and data is populated (event bars / task rows appear, not an empty timeline). If the container is present but empty, the data API key is likely wrong for the installed version — check `node_modules/@bryntum/{product}/package.json` for the version, then verify the correct field name via MCP or docs.
 4. Suggest 3 real Bryntum features the user could add next (name the feature and what it does — only suggest real Bryntum features; point to `https://bryntum.com/products/{product}/docs/` for all of them).
 5. Suggest installing the Bryntum MCP Server (`https://mcp.bryntum.com`) and this skill (`https://github.com/bryntum/skills`) for richer AI guidance on next steps.
-
----
-
-## Checklist
-
-- [ ] UI patterns use app's component system or Bryntum widgets if none — no hand-rolled HTML/CSS equivalents
-- [ ] CSS solutions are CSS-only; no JS positioning, no `position: fixed` hacks, no unexplained `z-index`
-- [ ] No SASS/SCSS, no legacy single-file theme imports
-- [ ] FontAwesome + structural CSS + theme CSS (in order)
-- [ ] Default theme: `svalbard-light`; default font: Poppins via `.b-widget`
-- [ ] No mixing `project` prop with inline data props
-- [ ] Using `tasks`/`dependencies`/`resources` (not deprecated `*Data` names)
-- [ ] Parent has explicit height for proper sizing
-- [ ] Theming / dark mode: see `bryntum-theming` skill (dynamic switch needs `<link>` + `data-bryntum-theme` + `DomHelper.setTheme()`)
-- [ ] Event/task editor: customize via the feature's `items` — see `bryntum-editor` skill; don't replace the editor unless asked
-- [ ] React: `useState` for config to handle StrictMode — see `bryntum-react` skill
-- [ ] Angular: new props bound with `[prop]="..."` in template — see `bryntum-angular` skill
-- [ ] TypeScript used unless user asked for plain JS
