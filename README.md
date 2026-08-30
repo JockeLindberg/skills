@@ -44,6 +44,14 @@ Custom event bar styling for Scheduler / Scheduler Pro: `eventRenderer` layouts,
 
 Customizing the built-in event/task editor — adding/removing fields and tabs via `eventEdit`/`taskEdit`, and the supported way to swap in a fully custom dialog.
 
+### `bryntum-features`
+
+Concept-to-feature lookup: what a user asks for in plain language ("shade 11:00-13:00 as lunch", "grey out weekends", "a totals row", "export to Excel", "swimlanes", "critical path") mapped to the built-in feature that does it, with the hand-rolled version each one replaces.
+
+### `bryntum-from-extjs`
+
+For codebases and habits coming from Ext JS. Maps Ext idioms to their Bryntum equivalents (`store.first()`, `component.down()`, `xtype`, `dataIndex`, `Ext.getCmp`, `Ext.Msg`) and flags the near-misses that fail silently rather than throwing.
+
 ---
 
 ## Installation
@@ -67,6 +75,8 @@ npx degit bryntum/skills/bryntum-drag-and-drop .claude/skills/bryntum-drag-and-d
 npx degit bryntum/skills/bryntum-theming .claude/skills/bryntum-theming
 npx degit bryntum/skills/bryntum-styling .claude/skills/bryntum-styling
 npx degit bryntum/skills/bryntum-editor .claude/skills/bryntum-editor
+npx degit bryntum/skills/bryntum-features .claude/skills/bryntum-features
+npx degit bryntum/skills/bryntum-from-extjs .claude/skills/bryntum-from-extjs
 ```
 
 **Install individually** (e.g. React only):
@@ -93,6 +103,8 @@ npx degit bryntum/skills/bryntum-drag-and-drop .agents/skills/bryntum-drag-and-d
 npx degit bryntum/skills/bryntum-theming .agents/skills/bryntum-theming
 npx degit bryntum/skills/bryntum-styling .agents/skills/bryntum-styling
 npx degit bryntum/skills/bryntum-editor .agents/skills/bryntum-editor
+npx degit bryntum/skills/bryntum-features .agents/skills/bryntum-features
+npx degit bryntum/skills/bryntum-from-extjs .agents/skills/bryntum-from-extjs
 ```
 
 **Install individually** (e.g. React only):
