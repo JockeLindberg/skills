@@ -91,7 +91,7 @@ Work through **0 → 4 in order**. Phase 2 ends with a hard stop for user approv
    | Grid | Grid | Grid |
    | TaskBoard | TaskBoard | TaskBoard |
 
-   No SchedulerPro guides exist for 8.x — its changes are in the Scheduler 8.x guides. Core and Chart have no upgrade guides of their own.
+   No SchedulerPro guides exist for 8.x — its changes are in the Scheduler 8.x guides. Core and Chart have no upgrade guides of their own. This table is for the **fallback** path: when `index.json` is available (Phase 1 step 1) use its `products` list instead — it adds the Core and Chart changelog digests, which carry Store / Model / DomHelper / CSS-variable breaking changes that are never mirrored into product changelogs.
 
 6. **Package manager** from the lockfile: `package-lock.json` → npm, `yarn.lock` → yarn, `pnpm-lock.yaml` → pnpm, `bun.lock`/`bun.lockb` → bun.
 
@@ -109,17 +109,25 @@ Work through **0 → 4 in order**. Phase 2 ends with a hard stop for user approv
      "product": { "id": "gantt", "name": "Gantt" },
      "baseUrl": "https://bryntum.com/products/gantt/docs-llm/migration/",
      "docsApiBaseUrl": "https://bryntum.com/products/gantt/docs/api/",
-     "products": ["Gantt", "SchedulerPro", "Scheduler", "Grid"],
-     "digests": { "Gantt": "Gantt/changelog/api-changes.md", "Grid": "Grid/changelog/api-changes.md" },
+     "docsGuideBaseUrl": "https://bryntum.com/products/gantt/docs/guide/",
+     "docsLlmGuideBaseUrl": "https://bryntum.com/products/gantt/docs-llm/guide/",
+     "products": ["Gantt", "SchedulerPro", "Scheduler", "Grid", "Chart", "Core"],
+     "productOrder": "most-specific first; read guides for a version in reverse order (base product first)",
+     "guideCoverage": {
+       "Gantt": { "upgrades": true, "whatsNew": true }, "SchedulerPro": { "upgrades": true, "whatsNew": true },
+       "Scheduler": { "upgrades": true, "whatsNew": true }, "Grid": { "upgrades": true, "whatsNew": true },
+       "Chart": { "upgrades": false, "whatsNew": false }, "Core": { "upgrades": false, "whatsNew": false }
+     },
+     "digests": { "Gantt": "Gantt/changelog/api-changes.md", "Grid": "Grid/changelog/api-changes.md", "Core": "Core/changelog/api-changes.md" },
      "tools": { "migrate6to7": "tools/migrate.js", "selectors": "tools/selectors.md" },
      "releases": [
        { "version": "7.2.1", "date": "2026-02-26", "products": {
            "Gantt": { "changelog": { "url": "Gantt/changelog/7.2.1.md", "sections": ["demos", "bug-fixes"] } },
            "Grid":  { "changelog": { "url": "Grid/changelog/7.2.1.md",  "sections": ["api-changes", "bug-fixes"] } }
        } },
-       { "version": "6.2.0", "date": "2024-08-14", "products": {
+       { "version": "6.2.0", "date": "2025-04-10", "products": {
            "Gantt": {
-             "changelog": { "url": "Gantt/changelog/6.2.0.md", "sections": ["features-enhancements", "api-changes", "bug-fixes"] },
+             "changelog": { "url": "Gantt/changelog/6.2.0.md", "sections": ["features-enhancements", "api-changes", "bug-fixes"], "breaking": true },
              "upgrade":   { "url": "Gantt/upgrades/6.2.0.md",  "source": "Gantt/upgrades/6.0.0+.md",  "anchor": "Gantt v6.2.0" },
              "whatsNew":  { "url": "Gantt/whats-new/6.2.0.md", "source": "Gantt/whats-new/6.0.0+.md", "anchor": "Gantt v6.2.0" }
            } } }
@@ -128,12 +136,14 @@ Work through **0 → 4 in order**. Phase 2 ends with a hard stop for user approv
    ```
 
    - All `url` values are relative to `baseUrl`. `releases` is sorted **descending** — reverse it.
+   - `products` is most-specific first and includes the base libraries (Core, Chart) — `productOrder` says so. For each version read guides in **reverse** `products` order (base product first). Core and Chart contribute changelogs + `digests` only, never guides.
+   - `guideCoverage.<Product>.upgrades === false` means that product is changelog-only in this index (Core, Chart, and SchedulerPro on the 8.x line). A missing `upgrade` key for such a product does **not** mean "no changes this version" — for SchedulerPro 8.x they live in the Scheduler 8.x guides.
    - Per-release 7.x/8.x guides have no `source`/`anchor`; `date` is `null` for guide-only versions.
-   - `sections` ids: `features-enhancements`, `api-changes`, `styling-changes`, `locale-updates`, `demos`, `bug-fixes`.
-   - `upgrade` / `whatsNew` are already **pre-sliced per version** (rollups were split for you) — never slice.
-   - Fetch `digests.<Product>` for every sibling product **first**: each is a small file holding only API CHANGES + STYLING CHANGES across all releases. It is the fastest way to see the whole breaking surface.
-   - `tools.migrate6to7` is the CSS/fonts codemod used in Phase 3.
-   - Relative links inside a guide look like `(#Gantt/model/ProjectModel#config-x)` → resolve as `docsApiBaseUrl + "Gantt/model/ProjectModel#config-x"`.
+   - `sections` ids: `features-enhancements`, `api-changes`, `styling-changes`, `locale-updates`, `demos`, `bug-fixes`. A `changelog` object may also carry `"breaking": true` and/or `"deprecated": true` (omitted when false), derived from `[BREAKING]` / `[DEPRECATED]` markers on the entries — the tightest filter you have (see the priority table in step 3).
+   - `upgrade` / `whatsNew` are already **pre-sliced per version** (rollups were split for you) — never slice. A slice may still contain **several** `## <Product> v<x.y.z>` sections (a version appearing twice in a rollup, or Scheduler + Scheduler Pro sharing a file on 8.x) — read the **whole** slice, not just the first section. `source`/`anchor` name the first rollup origin; `sources: [...]` lists all of them when several contributed.
+   - Fetch `digests.<Product>` for **every** entry in `products` (Core and Chart included) **first**: each is a small file holding only API CHANGES + STYLING CHANGES across all releases. It is the fastest way to see the whole breaking surface.
+   - `tools.migrate6to7` (CSS/fonts codemod, Phase 3) and `tools.selectors` are present **only when the files exist** — check the key before fetching.
+   - Resolve relative links inside a guide: `(#Gantt/model/ProjectModel#config-x)` → `docsApiBaseUrl + "Gantt/model/ProjectModel#config-x"`; `(#Gantt/guides/basics/x.md)` → `docsLlmGuideBaseUrl + "Gantt/guides/basics/x.md"` (or `docsGuideBaseUrl` for the rendered page).
 
 2. **Fallback — only when the index returns 404.**
 
@@ -154,7 +164,8 @@ Work through **0 → 4 in order**. Phase 2 ends with a hard stop for user approv
    | Priority | Read | Why |
    |----------|------|-----|
    | 1 | **Every** upgrade guide, fully | This is where breaking changes and Old/New code live |
-   | 2 | `api-changes` + `styling-changes` (digests, or those changelog sections) | Renames, removals, deprecations, CSS class/theme changes not in a guide |
+   | 1 | Every changelog flagged `"breaking": true` (index only), fully | `[BREAKING]` entries; far tighter than "has `api-changes`" — mark these releases ✱ in the plan |
+   | 2 | `api-changes` + `styling-changes` (digests, or those changelog sections); changelogs flagged `"deprecated": true` | Renames, removals, deprecations, CSS class/theme changes not in a guide |
    | 3 | What's-new, skim | New features that replace a customer workaround or override |
    | 4 | `bug-fixes` | Only when customer code references an issue number or carries a workaround comment |
    | — | Releases with only `bug-fixes` / `demos` / `locale-updates` and no guide | List in the plan; do not read |
@@ -200,8 +211,8 @@ Work through **0 → 4 in order**. Phase 2 ends with a hard stop for user approv
    Releases crossed: <n> (<list>) · Upgrade guides read: <n> · Source: index.json | docs fallback
 
    ## Reading list
-   | Version | Product | Upgrade guide | What's new | Changelog sections |
-   |---------|---------|---------------|------------|--------------------|
+   | Version | Product | Upgrade guide | What's new | Changelog sections (✱ = BREAKING) |
+   |---------|---------|---------------|------------|-----------------------------------|
 
    ## Actions (in version order)
    ### <version> — <Product>
@@ -249,7 +260,7 @@ Work through **0 → 4 in order**. Phase 2 ends with a hard stop for user approv
 
    Then set **every** `@bryntum/*` dependency to the **exact** target (`"7.2.1"`, no `^`/`~`); keep any `@npm:@bryntum/<product>-trial` alias. Install with the detected package manager so the lockfile updates (`npm install` / `yarn install` / `pnpm install` / `bun install`). Confirm with `node_modules/@bryntum/<pkg>/package.json` that every package reports the target.
 
-3. **6 → 7 hop:** fetch the codemod to a temp path (`curl -sf <baseUrl><tools.migrate6to7> -o /tmp/bryntum-migrate.js`; zip users already have `<Product>/migrate.js`), run it dry first and show the summary:
+3. **6 → 7 hop:** if the index has a `tools.migrate6to7` key, fetch the codemod to a temp path (`curl -sf <baseUrl><tools.migrate6to7> -o /tmp/bryntum-migrate.js`; zip users already have `<Product>/migrate.js`; no key and no zip → skip the codemod and do the selector renames as plan Actions), run it dry first and show the summary:
 
    ```bash
    node /tmp/bryntum-migrate.js ./src --migrations css,fonts --exclude "node_modules/**" --dry-run
@@ -289,17 +300,17 @@ Detection: `@bryntum/gantt` and `@bryntum/gantt-react` resolve to `6.0.3` in `no
 | SchedulerPro | 6.2.0, 6.3.0, 7.0.0, 7.1.0, 7.2.0 | 6.0.5, 6.1.0, 6.1.3, 6.1.4, 6.1.7, 6.1.8, 6.2.0, 6.2.4, 6.3.0, 7.0.0, 7.2.0 |
 | Gantt | 6.1.6, 6.2.0, 6.3.0, 7.0.0, 7.1.0, 7.2.0 | 6.1.0, 6.1.3, 6.1.4, 6.1.6, 6.1.7, 6.1.8, 6.2.0, 6.2.3, 6.2.4, 6.2.5, 6.3.0, 6.3.1, 7.0.0, 7.2.0 |
 
-There is no Gantt 6.1.0 upgrade guide — 6.1.0 has a what's-new entry and a changelog only. Reading list, Gantt rows (excerpt; sibling rows follow the same shape, `versions-support` omitted — it is never read):
+There is no Gantt 6.1.0 upgrade guide — 6.1.0 has a what's-new entry and a changelog only. Reading list, Gantt rows (excerpt; sibling rows follow the same shape, `versions-support` omitted — it is never read; ✱ = changelog carries `[BREAKING]` entries):
 
-| Version | Product | Upgrade guide | What's new | Changelog sections |
-|---------|---------|---------------|------------|--------------------|
+| Version | Product | Upgrade guide | What's new | Changelog sections (✱ = BREAKING) |
+|---------|---------|---------------|------------|-----------------------------------|
 | 6.0.4 – 6.0.5 | Gantt | — | — | features-enhancements / demos, bug-fixes (listed, not read) |
 | 6.0.6 | Gantt | — | — | **api-changes**, demos, bug-fixes |
 | 6.1.0 | Gantt | — | `## Gantt v6.1.0` in `whats-new/6.0.0+` | features-enhancements, demos, bug-fixes |
 | 6.1.6 | Gantt | `## Gantt v6.1.6` in `upgrades/6.0.0+` | `## Gantt v6.1.6` | features-enhancements, bug-fixes |
-| 6.2.0 | Gantt | `## Gantt v6.2.0` | `## Gantt v6.2.0` | features-enhancements, **api-changes**, demos, bug-fixes |
+| 6.2.0 | Gantt | `## Gantt v6.2.0` | `## Gantt v6.2.0` | ✱ features-enhancements, **api-changes**, demos, bug-fixes |
 | 6.3.0 | Gantt | `## Gantt v6.3.0` | `## Gantt v6.3.0` | features-enhancements, **api-changes**, locale-updates, demos, bug-fixes |
-| 7.0.0 | Gantt | `upgrades/7.0.0` | `whats-new/7.0.0` | features-enhancements, **api-changes**, **styling-changes**, locale-updates, demos, bug-fixes |
+| 7.0.0 | Gantt | `upgrades/7.0.0` | `whats-new/7.0.0` | ✱ features-enhancements, **api-changes**, **styling-changes**, locale-updates, demos, bug-fixes |
 | 7.0.1 – 7.0.2 | Gantt | — (Grid has 7.0.1 and 7.0.2 guides) | — | bug-fixes (listed, not read) |
 | 7.1.0 | Gantt | `upgrades/7.1.0` ("Salesforce support") | — | features-enhancements, **styling-changes**, bug-fixes |
 | 7.1.1 – 7.1.3 | Gantt | — | — | bug-fixes / demos (listed, not read) |
