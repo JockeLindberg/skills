@@ -25,6 +25,7 @@ Load the relevant skill, or fetch the raw file directly if the skill is not inst
 | Theme catalog, dark mode, or runtime theme switching | `bryntum-theming` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-theming/SKILL.md |
 | Custom event bar content / `eventRenderer` layouts | `bryntum-styling` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-styling/SKILL.md |
 | Customizing the built-in event/task editor popup | `bryntum-editor` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-editor/SKILL.md |
+| Upgrading an existing Bryntum app to a newer version / bumping `@bryntum/*` packages | `bryntum-migrate` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-migrate/SKILL.md |
 
 ---
 

@@ -44,6 +44,10 @@ Custom event bar styling for Scheduler / Scheduler Pro: `eventRenderer` layouts,
 
 Customizing the built-in event/task editor — adding/removing fields and tabs via `eventEdit`/`taskEdit`, and the supported way to swap in a fully custom dialog.
 
+### `bryntum-migrate`
+
+Upgrading an existing Bryntum app to a newer version: detects installed and target versions, gathers the ordered upgrade guides / what's-new / changelogs across the product and the products it inherits from, cross-references them with your code, writes a migration plan you approve, then applies it (including the v6 → v7 CSS codemod) and verifies the build.
+
 ---
 
 ## Installation
@@ -67,6 +71,7 @@ npx degit bryntum/skills/bryntum-drag-and-drop .claude/skills/bryntum-drag-and-d
 npx degit bryntum/skills/bryntum-theming .claude/skills/bryntum-theming
 npx degit bryntum/skills/bryntum-styling .claude/skills/bryntum-styling
 npx degit bryntum/skills/bryntum-editor .claude/skills/bryntum-editor
+npx degit bryntum/skills/bryntum-migrate .claude/skills/bryntum-migrate
 ```
 
 **Install individually** (e.g. React only):
@@ -93,6 +98,7 @@ npx degit bryntum/skills/bryntum-drag-and-drop .agents/skills/bryntum-drag-and-d
 npx degit bryntum/skills/bryntum-theming .agents/skills/bryntum-theming
 npx degit bryntum/skills/bryntum-styling .agents/skills/bryntum-styling
 npx degit bryntum/skills/bryntum-editor .agents/skills/bryntum-editor
+npx degit bryntum/skills/bryntum-migrate .agents/skills/bryntum-migrate
 ```
 
 **Install individually** (e.g. React only):
