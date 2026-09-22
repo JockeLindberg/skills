@@ -40,6 +40,7 @@ claude mcp add --transport http bryntum https://mcp.bryntum.com
 | Take the installed version from `node_modules` or the lockfile | Trust the semver range in `package.json` |
 | Targeting 8.x from a Scheduler Pro app: switch to `@bryntum/scheduler*` + `tier : 'enterprise'` | Keep `@bryntum/schedulerpro` when targeting 8.x — the package line ends at 7.x, the classes are deprecated aliases until 9.0.0 |
 | Treat the "v8 headline changes" table as a checklist the plan must answer | Assume the package name is stable across the hop |
+| Print which docs host and which source (index vs fallback) you used in the plan header | Silently fall back — if the index fetch fails, say so in the plan header (`Source: docs fallback (index 404)`) |
 | Write the plan, then **stop** and wait for explicit approval | Edit a single file before the user approves the plan |
 | Keep the plan file updated as a checklist while applying | Apply from memory and report at the end |
 | Use `search_bryntum_docs` with the **target** `version` for API lookups | Guess replacement APIs from the old version's docs |
@@ -101,7 +102,9 @@ Work through **0 → 4 in order**. Phase 2 ends with a hard stop for user approv
 
 ### 1. Gather the ordered reading list
 
-1. **Primary source — try first.** `curl -sf https://bryntum.com/products/<product>/docs-llm/migration/index.json`. On 200, use it and skip step 2. Schema:
+**Docs host:** `$BRYNTUM_DOCS_BASE_URL` if that environment variable is set (no trailing slash, e.g. `http://127.0.0.1:4179`), otherwise `https://bryntum.com`. Every URL below is `<docs host>/products/<product>/...`. When the host is overridden and the index's `baseUrl` / `docs*BaseUrl` values still start with `https://bryntum.com`, swap that origin for `<docs host>` before fetching anything relative to them.
+
+1. **Primary source — try first.** `curl -sf <docs host>/products/<product>/docs-llm/migration/index.json` — with the default host, `https://bryntum.com/products/gantt/docs-llm/migration/index.json`. On 200, use it and skip step 2. Schema:
 
    ```json
    {
@@ -150,11 +153,11 @@ Work through **0 → 4 in order**. Phase 2 ends with a hard stop for user approv
    | Need | Source |
    |------|--------|
    | Release versions | `npm view @bryntum/<product> versions --json`, keep `(installed, target]` |
-   | Upgrade guide | `https://bryntum.com/products/<product>/docs/guide/<Product>/upgrades/<version>` |
-   | What's new | `https://bryntum.com/products/<product>/docs/guide/<Product>/whats-new/<version>` |
-   | Version history (all changelogs, one page) | `https://bryntum.com/products/<product>/docs/guide/<Product>/changelog` |
-   | API diff table | `https://bryntum.com/products/<product>/docs/?v=<version>#apidiff` |
-   | v7 CSS migration guide | `https://bryntum.com/products/<product>/docs-llm/guide/<Product>/migration/migrate-to-new-css.md` |
+   | Upgrade guide | `<docs host>/products/<product>/docs/guide/<Product>/upgrades/<version>` |
+   | What's new | `<docs host>/products/<product>/docs/guide/<Product>/whats-new/<version>` |
+   | Version history (all changelogs, one page) | `<docs host>/products/<product>/docs/guide/<Product>/changelog` |
+   | API diff table | `<docs host>/products/<product>/docs/?v=<version>#apidiff` |
+   | v7 CSS migration guide | `<docs host>/products/<product>/docs-llm/guide/<Product>/migration/migrate-to-new-css.md` |
    | Zip install | `docs/` + `changelog.md` inside the extracted archive |
 
    Guides exist **sparsely** — not every release has one; a 404 for a version is normal. Pre-7.0 guides are rollups named `6.0.0+`, `5.0.0+`, … with `## <Product> v6.2.0`-style headings inside — fetch `.../upgrades/6.0.0+` and slice it yourself by heading, keeping only versions in `(installed, target]`. From 7.0.0 there is one file per release (`7.0.0`, `7.1.0`, `7.2.0`, …, `8.0.0`, `8.1.0` — 8.x uses the same URL shapes, e.g. `.../docs/guide/Scheduler/upgrades/8.0.0`; a former Scheduler Pro app reads them under `/products/scheduler/`). Repeat for every sibling product, swapping `<product>`/`<Product>` (Grid guides live at `/products/grid/docs/guide/Grid/...`).
@@ -208,7 +211,8 @@ Work through **0 → 4 in order**. Phase 2 ends with a hard stop for user approv
 
    Product: <Product> (+ siblings: …) · Framework: <framework> · Package manager: <pm>
    Package rename: none | `@bryntum/schedulerpro*` → `@bryntum/scheduler*` (Scheduler Pro is the Enterprise tier of Scheduler from 8.0)
-   Releases crossed: <n> (<list>) · Upgrade guides read: <n> · Source: index.json | docs fallback
+   Releases crossed: <n> (<list>) · Upgrade guides read: <n>
+   Docs host: <docs host> · Source: index.json | docs fallback (index 404)
 
    ## Reading list
    | Version | Product | Upgrade guide | What's new | Changelog sections (✱ = BREAKING) |
