@@ -167,18 +167,43 @@ body {
 
 ## Data loading
 
-**Never mix `project` prop with inline data props** — throws an error. Pick one:
+### Gantt and Scheduler Pro: data lives in the project
+
+Gantt and Scheduler Pro keep all data (tasks/events, dependencies, resources, assignments, calendars) in a **project** (`ProjectModel`), which runs the scheduling engine. Pass `project` as a `ProjectModel` instance **or** a config object:
+
+```js
+// Inline data
+new Gantt({
+    project : {
+        tasks        : [...],
+        dependencies : [...]
+    }
+});
+
+// Remote data (loadUrl/syncUrl are shortcuts for transport.load.url/transport.sync.url)
+new Gantt({
+    project : {
+        loadUrl  : '/api/load',
+        syncUrl  : '/api/sync',
+        autoLoad : true
+    }
+});
+```
+
+Project-level settings such as `calendar`, `calendars`, `startDate`, and `autoSetConstraints` also go in the project.
+
+**React:** a `project` prop object that holds store data (`tasks`, `dependencies`, ...) logs a dev warning ("Using the "project" prop with inner store configurations is not recommended"). Put inline data on the project component instead and pass its ref — see the `bryntum-react` skill. A `project` prop with only transport config (`loadUrl`/`syncUrl`/`autoLoad`) is fine. Vue and Angular accept the config object as-is (Angular: `[project]="ganttProps.project"`).
+
+**Never mix `project` with inline data props** — throws "Providing both project and inline data is not supported":
 
 ```tsx
-// ✅ Data inside project config
-<BryntumGantt project={{ tasks: myTasks, dependencies: myDeps }} />
-
-// ✅ Data as props, no project
-<BryntumGantt tasks={myTasks} dependencies={myDeps} />
-
 // ❌ WRONG — will throw
 <BryntumGantt tasks={myTasks} project={{ autoSetConstraints: true }} />
 ```
+
+### Scheduler and Calendar
+
+Pass `events`/`resources` (and `assignments` if an event needs several resources) as component props.
 
 **v7 deprecations**: Use `tasks`/`dependencies`/`resources`/`assignments` — not `tasksData`/`dependenciesData` etc.
 
@@ -200,12 +225,12 @@ body {
 
 ### Scheduler Pro
 - `viewPreset: "hourAndDay"`, `barMargin`, `columns` with `name` column.
-- Put `events`/`resources`/`assignments`/`dependencies` on a **separate ProjectModel** referenced via `project` prop.
+- Put `events`/`resources`/`assignments`/`dependencies` in the **project** — a `project` config object or `ProjectModel` instance (React: `<BryntumSchedulerProProjectModel>` + ref; see Data loading).
 - Events have `startDate` + `duration` (`endDate` is derived). Wire dependencies as a finish-to-start chain — give only the first event a `startDate`, let dependencies cascade the rest so the schedule lays out visibly.
 
 ### Gantt
 - `viewPreset: "weekAndDayLetter"`, `barMargin`, `name` column.
-- Put `tasks`/`dependencies`/`resources`/`assignments` on a **separate ProjectModel** referenced via `project` prop.
+- Put `tasks`/`dependencies`/`resources`/`assignments` in the **project** — a `project` config object or `ProjectModel` instance (React: `<BryntumGanttProjectModel>` + ref; see Data loading).
 - Wire dependencies as a finish-to-start chain — give only the first task a `startDate`, let dependencies cascade so the schedule lays out visibly.
 
 ### Calendar
