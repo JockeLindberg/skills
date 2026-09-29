@@ -38,7 +38,7 @@ Theme catalog, choosing a theme to match the host app (Material / Fluent), and d
 
 ### `bryntum-styling`
 
-Custom event bar styling for Scheduler / Scheduler Pro: `eventRenderer` layouts, event bar DOM structure, padding CSS variables, sticky content, and a worked two-line layout example.
+Custom event bar styling for Scheduler / Scheduler Pro (`eventRenderer` layouts, event bar DOM structure, padding CSS variables, sticky content) and widget `rendition` variants for buttons, text fields and tooltips, plus the form look. Depth lives in `references/`.
 
 ### `bryntum-editor`
 
