@@ -52,6 +52,10 @@ Concept-to-feature lookup: what a user asks for in plain language ("shade 11:00-
 
 For codebases and habits coming from Ext JS. Maps Ext idioms to their Bryntum equivalents (`store.first()`, `component.down()`, `xtype`, `dataIndex`, `Ext.getCmp`, `Ext.Msg`) and flags the near-misses that fail silently rather than throwing.
 
+### `bryntum-migrate`
+
+Upgrading an existing Bryntum app to a newer version: detects installed and target versions, gathers the ordered upgrade guides / what's-new / changelogs across the product and the products it inherits from, cross-references them with your code, writes a migration plan you approve, then applies it (including the v6 → v7 CSS codemod) and verifies the build.
+
 ---
 
 ## Installation
@@ -77,6 +81,7 @@ npx degit bryntum/skills/bryntum-styling .claude/skills/bryntum-styling
 npx degit bryntum/skills/bryntum-editor .claude/skills/bryntum-editor
 npx degit bryntum/skills/bryntum-features .claude/skills/bryntum-features
 npx degit bryntum/skills/bryntum-from-extjs .claude/skills/bryntum-from-extjs
+npx degit bryntum/skills/bryntum-migrate .claude/skills/bryntum-migrate
 ```
 
 **Install individually** (e.g. React only):
@@ -105,6 +110,7 @@ npx degit bryntum/skills/bryntum-styling .agents/skills/bryntum-styling
 npx degit bryntum/skills/bryntum-editor .agents/skills/bryntum-editor
 npx degit bryntum/skills/bryntum-features .agents/skills/bryntum-features
 npx degit bryntum/skills/bryntum-from-extjs .agents/skills/bryntum-from-extjs
+npx degit bryntum/skills/bryntum-migrate .agents/skills/bryntum-migrate
 ```
 
 **Install individually** (e.g. React only):

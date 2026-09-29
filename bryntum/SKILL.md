@@ -27,6 +27,7 @@ Load the relevant skill, or fetch the raw file directly if the skill is not inst
 | Customizing the built-in event/task editor popup | `bryntum-editor` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-editor/SKILL.md |
 | A request phrased as an outcome (shade a time range, grey out weekends, totals row, export, undo, swimlanes, critical path) — find the built-in feature before hand-rolling | `bryntum-features` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-features/SKILL.md |
 | Ext JS / Sencha background, or Ext idioms appearing in the code (`store.first()`, `down()`, `xtype`, `dataIndex`, `Ext.*`) | `bryntum-from-extjs` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-from-extjs/SKILL.md |
+| Upgrading an existing Bryntum app to a newer version / bumping `@bryntum/*` packages | `bryntum-migrate` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-migrate/SKILL.md |
 
 ---
 
