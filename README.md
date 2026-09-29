@@ -60,9 +60,21 @@ Upgrading an existing Bryntum app to a newer version: detects installed and targ
 
 ## Installation
 
-Copy the skills you need into your agent's skills folder. At minimum, install `bryntum` plus the skill for your framework.
+At minimum, install `bryntum` plus the skill for your framework.
 
-### Claude Code
+### Easiest: the `skills` CLI
+
+Run this in your project folder. The CLI detects your agents and lets you choose skills:
+
+```bash
+npx skills add bryntum/skills
+```
+
+### Manual install
+
+Or copy the skills you need into your agent's skills folder with `degit`.
+
+#### Claude Code
 
 Skills live in `.claude/skills/` (project-local). Use `~/.claude/skills/` instead to install them globally for all projects.
 
@@ -91,7 +103,7 @@ npx degit bryntum/skills/bryntum .claude/skills/bryntum
 npx degit bryntum/skills/bryntum-react .claude/skills/bryntum-react
 ```
 
-### Codex
+#### Codex
 
 Skills live in `.agents/skills/` (project-local). Use `~/.agents/skills/` instead to install them globally for all projects.
 
