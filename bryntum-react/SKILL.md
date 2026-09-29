@@ -12,7 +12,7 @@ metadata:
 
 ## Quick-start guide
 
-Fetch before writing code:
+When scaffolding a new app, fetch (skip for migrations or existing apps):
 `https://bryntum.com/products/{product}/docs-llm/guide/{Product}/quick-start/react.md`
 
 ---
@@ -32,6 +32,10 @@ const ganttRef = useRef(null);
 // access instance: ganttRef.current.instance
 <BryntumGantt ref={ganttRef} {...ganttProps} />
 ```
+
+### Features
+
+Features are props with a `Feature` suffix, not a `features` object: `eventTooltipFeature={{ … }}`, `excelExporterFeature`. A `features` prop fails TypeScript with TS2353. At runtime they're still on `ref.current.instance.features`.
 
 ### StrictMode (React 18+)
 
