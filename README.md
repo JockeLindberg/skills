@@ -46,7 +46,7 @@ Customizing the built-in event/task editor — adding/removing fields and tabs v
 
 ### `bryntum-features`
 
-Concept-to-feature lookup: what a user asks for in plain language ("shade 11:00-13:00 as lunch", "grey out weekends", "a totals row", "export to Excel", "swimlanes", "critical path") mapped to the built-in feature that does it, with the hand-rolled version each one replaces.
+Concept-to-feature lookup: what a user asks for in plain language ("shade 11:00-13:00 as lunch", "grey out weekends", "a totals row", "export to Excel", "swimlanes", "critical path") mapped to the built-in feature that does it, plus the commonly invented APIs that don't exist.
 
 ### `bryntum-from-extjs`
 
