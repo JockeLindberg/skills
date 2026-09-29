@@ -53,6 +53,29 @@ createRoot(document.getElementById('root')!).render(
 
 **Never retain references to destroyed Bryntum instances after unmount.** Do not use `useEffect`/`useRef` patterns that hold the instance across the unmount cycle.
 
+### Gantt / Scheduler Pro: project data
+
+Gantt and Scheduler Pro keep their data in a project. Don't put store data inside a `project` prop object — the wrapper logs *"Using the "project" prop with inner store configurations is not recommended"*. Put the data on the project component and pass its ref to the Gantt:
+
+```tsx
+import { useRef } from 'react';
+import { BryntumGantt, BryntumGanttProjectModel } from '@bryntum/gantt-react';
+import { ganttProps, projectProps } from './ganttConfig'; // projectProps: { tasks, dependencies, ... }
+
+function App() {
+    const project = useRef<BryntumGanttProjectModel>(null);
+
+    return (
+        <>
+            <BryntumGanttProjectModel ref={project} {...projectProps} />
+            <BryntumGantt project={project} {...ganttProps} />
+        </>
+    );
+}
+```
+
+Type `projectProps` as `BryntumGanttProjectModelProps`. Project-level settings (`calendar`, `calendars`, `loadUrl`, `autoLoad`) go in `projectProps` too. Scheduler Pro uses `BryntumSchedulerProProjectModel` the same way.
+
 ### Vite config
 
 Include Bryntum packages in `optimizeDeps` to prevent multiple bundle loading in dev:
