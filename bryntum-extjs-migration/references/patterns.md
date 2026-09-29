@@ -40,6 +40,9 @@ AppToolbar.initClass();   // registers the type so { type : 'apptoolbar' } works
 - Ext `initComponent` → `construct(...args)` + `super.construct(...args)`. (G-G)
 - Ext `config : {}` + `applyX`/`updateX` → `static configurable = {}` (apply/update hooks: UNV, check docs).
 - Don't subclass when a config on the stock widget does the job.
+- Widgets have `callOnFunctions : true`, so a method named `on<EventName>` (e.g. `onBeforeEventDropFinalize`) is already
+  a listener. Registering it again with `on()` runs it twice. Before naming a helper `on<X>`, check that the base class
+  doesn't already fire an `x` event. (SRC)
 
 ## 3. Toolbar items and handlers (G-G, SRC)
 
@@ -54,27 +57,21 @@ tbar : {
 }
 ```
 
-- `'up.name'` resolves the handler on an ancestor widget.
+- `'up.name'` calls `name(event)` on the nearest ancestor that has a `name` property. Point it only at methods written
+  as handlers. Two traps (SRC):
+  - `'up.hide'` on a Popup's bbar button finds the bbar `Toolbar` first. The toolbar disappears and the modal stays
+    open. Use `'up.onCancelClick'` with `onCancelClick() { this.hide(); }`.
+  - API methods that take arguments (`shiftNext(amount)`, `zoomIn(levels)`, `hide(animate)`) receive the click event
+    as their argument. Wrap them: `onNextClick() { this.shiftNext(); }`.
 - Access items by key: `this.widgetMap.addButton`. Ext `reference` / `itemId` → the key in `items`.
-- Button `cls : 'b-raised'` → `rendition : 'filled'`.
 - Ext `header : { items }` → Panel `tools` (Grid, Scheduler, Gantt are Panels in 7.x).
 
 ## 4. ViewModel bindings → explicit state
 
-Ext `bind : '{rowHeight}'` shared by two components → set the value explicitly on both and update from an `onChange`
-handler:
-
-```js
-tools : {
-    rowHeightField : { type : 'numberfield', label : 'Row height', min : 20, value : 45, onChange : 'up.onRowHeightChange' }
-},
-onRowHeightChange({ value }) {
-    this.rowHeight = value;
-}
-```
-
-In a framework target, hold the value in framework state and pass it as a prop to the Bryntum wrapper component.
-ViewModel `formulas` → computed values (a calculated model field, a getter, or framework computed state). (SRC)
+An Ext `bind : '{rowHeight}'` shared by two components becomes an explicit value on each, kept in sync by an
+`onChange : 'up.onRowHeightChange'` handler on the field. In a framework target, hold the value in framework state and
+pass it to the wrapper as a prop. ViewModel `formulas` become computed values: a calculated model field, a getter, or
+framework computed state. (SRC)
 
 ## 5. Event / task editor
 
@@ -135,45 +132,48 @@ export default class RangeEditor extends Popup {
         bbar : {
             items : {
                 saveButton   : { text : 'Save', rendition : 'filled', onClick : 'up.onSaveClick' },
-                cancelButton : { text : 'Cancel', onClick : 'up.hide' }
+                cancelButton : { text : 'Cancel', onClick : 'up.onCancelClick' }   // not 'up.hide' (§3)
             }
         },
         keyMap : { Enter : 'onSaveClick' }   // Ext dialogs often saved on Enter
     };
 
     onSaveClick() {
-        const
-            { nameField, startDateField, startTimeField } = this.widgetMap,
-            fields = [nameField, startDateField, startTimeField];
-
-        if (fields.every(field => field.isValid)) {
+        const { nameField, startDateField, startTimeField } = this.widgetMap;
+        if ([nameField, startDateField, startTimeField].every(field => field.isValid)) {
             // write back to the store, then:
             this.hide();
         }
+    }
+
+    onCancelClick() {
+        this.hide();
     }
 }
 
 RangeEditor.initClass();
 ```
 
-Full working version: `examples/scheduler-extjsmodern-vite/lib/TimeRangeEditor.js` in the extjs-migration-agent repo.
+This pattern (checked against 7.3.7: Cancel closes the dialog, and Enter saves only when the fields are valid) is
+adapted from `examples/scheduler-extjsmodern-vite/lib/TimeRangeEditor.js` in the extjs-migration-agent repo, which is
+currently internal to Bryntum.
 In a framework app that already has a component system (MUI, Angular Material, Vuetify, ...), use that system's dialog
 for app-level dialogs instead (core skill, widget-first rule).
 
 ## 7. Rendering
 
-- `Ext.XTemplate` / string templates → functions returning template literals. Escape user data with the
-  `StringHelper.xss` tagged template. (SRC)
 - Scheduler: `eventRenderer({ eventRecord, resourceRecord, renderData })` — set `renderData.cls` / `renderData.style`,
   return HTML or a DOM config. Custom layouts: see the `bryntum-styling` skill. (SRC)
 - Gantt: `taskRenderer({ taskRecord, renderData })`. (SRC)
 - Colors painted in renderers (`background-color : resource.color`) → `eventColor` on the event or resource (any CSS
   color) plus `eventStyle`. (SRC)
 - Row CSS class (`getRowClass`) → `cls` field on the record, or a column `renderer`. (G-G)
-- Grid group headers: `groupRenderer({ groupColumn, groupRowFor, isFirstColumn })` in 7.x — don't port checks like
-  `data.column === data.grid.columns.first`. (SRC)
+- Grid group headers (Ext `groupHeaderTpl`): `features : { group : { field, renderer({ groupRowFor, count, isFirstColumn }) { return isFirstColumn ? '…' : ''; } } }`.
+  Per column: `column.groupRenderer({ groupRowFor, count, groupColumn })`, which gets no `isFirstColumn`. Don't port
+  checks like `data.column === data.grid.columns.first`. (SRC)
 - Tooltips: the product's tooltip feature (`eventTooltip`, `taskTooltip`, `cellTooltip`) with a `template`/renderer
-  function. (SRC / DOC per product)
+  function. `cellTooltip` is off by default in Grid: a column `tooltipRenderer` does nothing until you set
+  `features : { cellTooltip : true }`. (SRC / DOC per product)
 
 ## 8. Localization
 
@@ -199,12 +199,11 @@ toolbar widget (Gantt, Scheduler Pro — G-G). For Scheduler/Grid, confirm the S
 
 ## 10. Framework targets
 
-The migration steps are the same; only where the config lives changes. Load the matching framework skill.
+The steps are the same for every target. Only the place where the config lives changes, and the framework skill covers
+the wrapper.
 
 | Concern | Vanilla | React | Angular | Vue 3 |
 |---|---|---|---|---|
-| Root widget | `new Gantt({ appendTo })` | `<BryntumGantt {...props} />` | `<bryntum-gantt [prop]="...">` | `<bryntum-gantt v-bind="config">` |
-| Converted Ext config | the constructor object | a `useState`-held props object | a typed config object in the component | a typed `BryntumGanttProps` object |
 | Instance access | variable / `window.gantt` | `ref.current.instance` | `@ViewChild(...).instance` | template ref `.instance` |
 | Custom Bryntum classes (`Toolbar`/`Popup` subclasses) | `lib/*.js` | same classes, imported and referenced by `type` | same | same |
 | ViewModel binds | handlers | React state → props | component state/inputs → bindings | refs/reactive → props |

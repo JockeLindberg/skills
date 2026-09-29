@@ -9,8 +9,8 @@ load the `bryntum-crud` skill.
    `dataSource`. Default when a real backend exists that the team doesn't want to change. (G-S, G-G)
 2. **Convert the data** to Bryntum's camelCase fields and structures. Required for structures that can't be expressed
    as field mappings (Gantt calendars, `TaskType`, baselines). For static JSON, convert with a checked-in script
-   (e.g. `scripts/convert-data.mjs`) so it can be re-run. For a real backend, this means a server change — say so in
-   the plan and get the user's agreement. (G-G)
+   (e.g. `scripts/convert-data.mjs`) so it can be re-run. With a real backend, this means changing the server, so say
+   so in the plan and get the user's agreement. (G-G)
 
 Count the important records (resources, events/tasks, assignments, dependencies, rows) before and after, and record
 both counts in the report.
@@ -29,6 +29,11 @@ both counts in the report.
 | `idProperty : 'Id'` | `idField : 'Id'` (store) or `{ name : 'id', dataSource : 'Id' }` | G-S |
 | `hasMany` / `belongsTo` associations | no direct equivalent — flatten, or use Bryntum's built-in relations (assignments, dependencies, tree children) | UNV |
 | Sch/Gnt model subclasses (`Sch.model.Event`, `Gnt.model.Task`) | `EventModel`, `ResourceModel`, `TaskModel`, `DependencyModel`, `AssignmentModel`, `CalendarModel` | G-S, G-G |
+
+Leave the `id` field untyped, even when Ext declared `{ name : 'Id', type : 'int' }`. JSON numeric ids stay numbers
+anyway. Observed in 7.3.7 (possibly a bug): with `type : 'int'` on `id`, with or without `dataSource`, a grouped
+Store/AjaxStore keeps only one record (8 rows → 1, with no error). `type : 'number'` gives 16 rows instead of 12.
+Ungrouped stores are unaffected.
 
 Extra fields that keep their name can be declared as strings: `fields : ['location', { name : 'eventType', defaultValue : 'appointment' }]`
 (SRC). Declare only fields the app actually uses.
@@ -81,22 +86,8 @@ crudManager : {
 }
 ```
 
-Model subclass mapping (G-S):
-
-```js
-import { EventModel } from '@bryntum/scheduler';
-
-export default class MyEvent extends EventModel {
-    static $name = 'MyEvent';
-    static fields = [
-        { name : 'name',       type : 'string', dataSource : 'Title' },
-        { name : 'resourceId', dataSource : 'ResourceId' },
-        { name : 'startDate',  type : 'date',   dataSource : 'StartDate' },
-        { name : 'endDate',    type : 'date',   dataSource : 'EndDate' },
-        { name : 'location',   dataSource : 'Location' }
-    ];
-}
-```
+To map fields in a model subclass instead, use the same `{ name, dataSource }` entries in `static fields` on an
+`EventModel` / `ResourceModel` subclass, with `eventStore : { modelClass }`. (G-S)
 
 ## Scheduler Pro
 
@@ -111,17 +102,14 @@ not ad hoc stores, whenever the app has dependencies, assignments or calendars. 
 
 ### Field renames (G-G, corrected)
 
+Most fields are PascalCase → camelCase (`Id` → `id`, `StartDate` → `startDate`, `PercentDone` → `percentDone`,
+`ConstraintType` → `constraintType`, `ShowInTimeline` → `showInTimeline`, `PerUseCost` → `perUseCost`, …). The
+exceptions:
+
 | Ext Gantt | Bryntum Gantt |
 |---|---|
-| `Id`, `Name`, `Description`, `Cls` | `id`, `name`, `description`, `cls` |
-| `StartDate` / `EndDate` / `Duration` / `PercentDone` | `startDate` / `endDate` / `duration` / `percentDone` |
-| `Rollup`, `Segments`, `Resizable`, `Draggable` | `rollup`, `segments`, `resizable`, `draggable` |
-| `AllowDependencies`, `ShowInTimeline` | `allowDependencies`, `showInTimeline` |
-| `ConstraintType` / `ConstraintDate` | `constraintType` / `constraintDate` |
-| `Rate` / `PerUseCost` / `Units` | `rate` / `perUseCost` / `units` |
 | Dependency `From` / `To` | `fromTask` / `toTask` |
 | Assignment `TaskId` / `ResourceId` | **`event` / `resource`** (the guide's table says `taskId`/`resourceId` — wrong; SRC `AssignmentModel.js`) |
-| General rule | PascalCase → camelCase |
 
 ### Structural changes (the data itself must change)
 

@@ -6,7 +6,8 @@ Verified against Bryntum **7.3.7**. For a newer installed version, confirm anyth
 Tags:
 
 - **G-S** / **G-G** — stated in the official Ext → Bryntum Scheduler / Gantt migration guide (corrected where wrong)
-- **SRC** — confirmed in 7.3.7 source or a finished migration in the extjs-migration-agent examples
+- **SRC** — confirmed in 7.3.7 source or a finished migration in the extjs-migration-agent examples (that repo is
+  currently internal to Bryntum)
 - **DOC** — added for general Ext app migrations; the name is confirmed in the 7.3.7 typings (`*.d.ts`), but the
   mapping hasn't been exercised in a finished migration — check config details in the docs before relying on them
 - **UNV** — the Bryntum name exists, but equivalence to the Ext behavior is not verified
@@ -36,9 +37,10 @@ Product-specific rows only apply to that product. Don't generalize a Gantt row t
 | panel `header : { items }` | Panel `tools` | Any widget config | SRC |
 | `Ext.toolbar.Paging` | `bbar : { type : 'pagingtoolbar' }` + AjaxStore remote paging | | DOC |
 | `Ext.menu.Menu` | `Menu` | | DOC |
-| `Ext.tip.ToolTip` / `data-qtip` | `Tooltip` / `data-btip` | | SRC |
+| `Ext.tip.ToolTip` / `data-qtip` | `Tooltip` / `data-btip` | Grid cell tooltips (renderer `metaData.tdAttr = 'data-qtip=…'`): column `tooltipRenderer` + `features : { cellTooltip : true }`, which is off by default | SRC |
 | `Ext.window.Toast` / `Ext.toast(msg)` | `Toast.show(msg)` | | SRC |
-| `Ext.Msg.alert` / `confirm` | `MessageDialog` | | DOC |
+| `Ext.Msg.alert` / `confirm(title, msg, fn)` | `await MessageDialog.confirm({ title, message, okButton : 'Yes', cancelButton : 'No' }) === MessageDialog.okButton` | Returns a `Promise<number>`. `message` is rendered as HTML, so escape user data | SRC |
+| `Ext.Msg.prompt` | `MessageDialog.prompt({ title, message, textField })` | Resolves to `{ button, text }` | SRC |
 | `Ext.Dialog` / `Ext.window.Window` + form | `Popup` subclass (`modal`, `centered`, `closable`, `autoShow : false`, `autoClose : false`, `bbar` buttons, `keyMap`). In a framework app with its own component system, use its dialog | See `patterns.md` §6 | SRC |
 | `xtype : 'list'` + `itemTpl`, `grouped`, store `grouper` | `type : 'list'`, `itemTpl(record)`, `groupHeaderTpl(record, groupName)`, `collapsibleGroups`, store `groupers` | | SRC |
 | overrides of Ext classes (`Ext.define(null, { override : 'Ext.field.Select' })`) | drop | They patch Ext bugs. List them in the report | SRC |
@@ -74,11 +76,12 @@ Product-specific rows only apply to that product. Don't generalize a Gantt row t
 | `eventBodyTemplate` (Ext.XTemplate) | `eventRenderer` returning HTML (preferred) | G-S, SRC |
 | `eventRenderer(event, resource, tplData)` | `eventRenderer({ eventRecord, resourceRecord, renderData })` | SRC |
 | `tooltipTpl` | `features : { eventTooltip : { template : ({ eventRecord }) => '...' } }` | G-S |
-| `setViewPreset(p)` | `scheduler.viewPreset = p` or `scheduler.zoomTo({ preset, startDate, endDate })` | G-S |
+| `setViewPreset(p)` / `switchViewPreset(p, start, end)` | `scheduler.viewPreset = p` + `setTimeSpan(start, end)`, or `scheduler.zoomTo({ preset, startDate, endDate })`. Either way the axis snaps to whole units of the preset: `weekAndDay` starts weeks on `weekStartDay` (Sunday by default), so a Mon–Mon span becomes two weeks. Align the start with `DateHelper.startOf(date, 'week')` or set `weekStartDay : 1` | G-S, SRC |
 | `setTimeSpan(s, e)` | `setTimeSpan(s, e)` | SRC |
 | `allowOverlap`, `eventBarTextField`, `readOnly`, `zoomOnMouseWheel` | same names | UNV |
 | `mode : 'vertical'` / `orientation` | `mode : 'vertical'` | UNV |
 | `dndValidatorFn` | `features.eventDrag.validatorFn` | UNV |
+| `beforeeventdrop` listener returning `false` | `beforeEventDropFinalize` (there is no `beforeEventDrop` in 7.x): set `context.valid = false`, or `context.async = true` + `context.finalize(bool)` | SRC |
 | `resizeValidatorFn` | `features.eventResize.validatorFn` | UNV |
 | `createValidatorFn` | `features.eventDragCreate.validatorFn` | UNV |
 | `multiSelect` (events) | `multiEventSelect` | UNV |
@@ -112,7 +115,7 @@ Product-specific rows only apply to that product. Don't generalize a Gantt row t
 | `cellediting` / `scheduler_treecellediting` (`clicksToEdit`) | `cellEdit` (default on in Grid-based widgets) | G-G, SRC |
 | `rowediting` | `rowEdit` (7.3.7 has it; compare its UX with the Ext row editor) | DOC |
 | `gridfilters` | `filter` (header menu) or `filterBar` (filter row) | G-G, SRC |
-| `ftype : 'grouping'` | `group` feature (`features : { group : 'field' }`) | DOC |
+| `ftype : 'grouping'` | `group` feature (`features : { group : 'field' }`). `hideGroupedHeader` has no Group config: set `hidden : true` on the grouped column (`hideGroupedColumns` exists only on `treeGroup`) | SRC |
 | `ftype : 'summary'` | `summary` feature + column `sum` | DOC |
 | `ftype : 'groupingsummary'` | `groupSummary` | DOC |
 | `rowexpander` / `ftype : 'rowbody'` | `rowExpander` | DOC |
@@ -178,21 +181,20 @@ Scheduler resource column with avatar: `type : 'resourceInfo'` (SRC).
 | `grid.getStore()` / `getSelectionModel().getSelection()` | `grid.store` / `grid.selectedRecords` | DOC |
 | `store.getAt(i)`, `store.getById(id)`, `store.add`, `store.remove` | same names | DOC |
 | `store.each(fn)` | `store.forEach(fn)` | DOC |
-| `listeners : { x : fn, scope }` | `listeners : { x : fn, thisObj }` or `widget.on({ x })` (returns a detacher) | G-G |
-| button `handler` | `onClick` / `onAction`; string `'up.methodName'` resolves on an ancestor | G-G, SRC |
+| `listeners : { x : fn, scope }` | `listeners : { x : fn, thisObj }` or `widget.on({ x })` (returns a detacher). A subclass method named `on<Event>` is already a listener (`callOnFunctions`), so don't also register it | G-G, SRC |
+| button `handler` | `onClick` / `onAction`; string `'up.methodName'` calls the method on the nearest ancestor that has it, passing the click event. See `patterns.md` §3 | G-G, SRC |
 | `Ext.getCmp(id)` / `lookupReference(ref)` / `down('#id')` | `widgetMap.ref`, `Widget.getById(id)` | G-G, SRC |
-| `Ext.String.format('{0}', a)` | template literal | G-G |
 | `Ext.XTemplate` | function returning a template literal; escape data with `StringHelper.xss` tagged template | SRC |
 | `Ext.Date.format(d, 'Y-m-d H:i')` | `DateHelper.format(d, 'YYYY-MM-DD HH:mm')` — **tokens differ** (PHP-style → moment-style: `Y`→`YYYY`, `m`→`MM`, `d`→`DD`, `H`→`HH`, `i`→`mm`, `s`→`ss`, `g:i A`→`h:mm A`, `D`→`ddd`, `l`→`dddd`, `M`→`MMM`, `F`→`MMMM`, `j`→`D`, `n`→`M`) | SRC |
 | `Ext.Date.add(d, Ext.Date.DAY, 1)` | `DateHelper.add(d, 1, 'day')` | SRC |
 | `Ext.Date.clearTime(d)` | `DateHelper.clearTime(d)` | SRC |
 | `suspendLayouts` / `resumeLayouts` | `suspendRefresh()` / `resumeRefresh()` | UNV |
-| `expandAll`, `collapseAll`, `zoomIn`, `zoomOut`, `zoomToFit`, `shiftPrevious`, `shiftNext` | same names | G-G |
+| `expandAll`, `collapseAll`, `zoomIn`, `zoomOut`, `zoomToFit`, `shiftPrevious`, `shiftNext` | same names. Wrap them in a handler rather than using `'up.shiftNext'` (the event object would become `amount`) | G-G, SRC |
 
 ## 8. No equivalent / needs a human
 
-When the app uses anything below, do NOT invent a replacement. Leave a `// MIGRATION:` comment, and list it under
-"Unmapped" with the reason. You may use a listed alternative only if the report says so explicitly.
+Don't invent replacements for these. Leave a `// MIGRATION:` comment and list the item under "Unmapped" with the
+reason. If you use one of the listed alternatives, say so in the report.
 
 | Ext JS | Status | Closest alternative | Tag |
 |---|---|---|---|
@@ -217,7 +219,7 @@ Outside Bryntum's scope — flag for a human; may need the host framework, a thi
 
 ## 9. Outdated advice (official guides, old blog posts, `ext-migration.zip`)
 
-Verified against 7.3.7 source. When reading any older material, correct these:
+Verified against the 7.3.7 source. Correct these whenever you read older material:
 
 - Scheduler `eventRenderer` argument `tplData` → **`renderData`**.
 - `eventEdit.editorConfig.showResourceField`, `startTimeConfig`, `endTimeConfig` → don't exist. Use

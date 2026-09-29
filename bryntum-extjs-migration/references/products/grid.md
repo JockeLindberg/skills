@@ -3,40 +3,18 @@
 Support level: **moderate** (type B verified in finished examples; type C — plain `Ext.grid.Panel` — follows the
 mappings in `../api-mapping.md`, many tagged DOC: confirm them in the docs for the installed version).
 
-Finished examples (extjs-migration-agent repo): `grid-extjsmodern-vite` (wrapper removal, header items → `tools`,
+Finished examples (extjs-migration-agent repo, currently internal to Bryntum): `grid-extjsmodern-vite` (wrapper removal, header items → `tools`,
 ViewModel binds → `selectionChange`, `groupRenderer` 7.x args), `grid-extjs-groupedheaders-vite` (grouped and
 collapsible headers, template/date/percent/check columns, combo editor, `StringHelper.xss`).
 
-## What a Bryntum Grid app looks like
-
-- `new Grid({ appendTo, columns, data | store, features, tbar, tools })` — Grid is a Panel (`title`, `tools`, `tbar`,
-  `bbar` work)
-- columns are plain configs `{ text, field, width | flex, type, editor, locked, renderer }`
-- behavior is `features : { ... }`, not plugins
-- header actions live in `tools`
-- ViewModel state becomes direct widget state plus handlers (`onSelectionChange`, field `onChange`) or framework state
+Grid is a Panel in 7.x (`title`, `tools`, `tbar`, `bbar` work), so Ext header actions move to `tools`.
 
 ## Type C: `Ext.grid.Panel` → `Grid`
 
-Typical conversion:
+Typical result for an `Ext.grid.Panel` with an ajax proxy (`rootProperty : 'data'`), date/number/check columns,
+`cellediting`, `gridfilters` and the `grouping` feature:
 
 ```js
-// Ext
-Ext.create('Ext.grid.Panel', {
-    title   : 'Orders',
-    store   : { model : 'Order', proxy : { type : 'ajax', url : '/api/orders', reader : { rootProperty : 'data' } }, autoLoad : true },
-    columns : [
-        { text : 'Customer', dataIndex : 'customer', flex : 1 },
-        { xtype : 'datecolumn', text : 'Date', dataIndex : 'date', format : 'Y-m-d' },
-        { xtype : 'numbercolumn', text : 'Total', dataIndex : 'total', format : '0.00' },
-        { xtype : 'checkcolumn', text : 'Paid', dataIndex : 'paid' }
-    ],
-    plugins  : { cellediting : { clicksToEdit : 1 }, gridfilters : true },
-    features : [{ ftype : 'grouping', groupHeaderTpl : '{name}' }],
-    renderTo : Ext.getBody()
-});
-
-// Bryntum
 new Grid({
     appendTo : 'app',
     title    : 'Orders',
@@ -65,7 +43,9 @@ Rules:
 - Grouped headers: parent column with `children : [...]`; collapsible groups use `collapsible`, `collapseMode :
   'toggleAll'`, `toggleAllHidden` (SRC, groupedheaders example).
 - Computed grouping (`grouper.groupFn`) → a calculated field + `groupers : [{ field : '<calculatedField>' }]`.
-- Group header renderers use the 7.x argument shape `groupRenderer({ groupColumn, groupRowFor, isFirstColumn })`.
+- Group header text goes in the Group feature's `renderer({ groupRowFor, count, isFirstColumn })`. The per-column
+  `groupRenderer` gets `{ groupRowFor, count, groupColumn, … }` and no `isFirstColumn` (`../patterns.md` §7).
+- Ext `hideGroupedHeader` has no Group config: set `hidden : true` on the grouped column.
 - `bufferedrenderer` and `infinite` configs are unnecessary — rendering is virtualized.
 - Anything relying on custom Ext column xtypes, deep store pipelines or Ext-only plugins not in `../api-mapping.md`:
   report as unmapped rather than inventing a column type.

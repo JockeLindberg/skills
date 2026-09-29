@@ -5,18 +5,8 @@ old app's domain meaning (status colors, holidays, custom renderer markup) — n
 
 ## CSS setup
 
-Plain CSS, as in the core `bryntum` skill (no SASS; Ext Sass variables and theme packages don't carry over):
-
-```css
-@import "@bryntum/<product>/fontawesome/css/fontawesome.css";
-@import "@bryntum/<product>/fontawesome/css/solid.css";
-@import "@bryntum/<product>/<product>.css";        /* structural, required */
-@import "@bryntum/<product>/stockholm-light.css";  /* one theme */
-/* app rules last */
-```
-
-Only when migrating an official Bryntum demo: add `@bryntum/demo-resources` (its `scss/example.scss` needs `sass`) and
-`DemoHeader`, as in the extjs-migration-agent examples.
+Use plain CSS `@import`s as in the core `bryntum` skill. Ext Sass variables and theme packages don't carry over. Only
+a migration of an official Bryntum demo adds `@bryntum/demo-resources`, whose `scss/example.scss` needs `sass`.
 
 ## Choosing a theme
 
@@ -56,9 +46,11 @@ Keep and rewrite:
   guess.
 - 7.x kebab-case renames: `.b-rownumber-cell` → `.b-row-number-cell`, `.b-timeranges` → `.b-time-ranges`,
   `.b-sch-timerange` → `.b-sch-time-range`, `.b-timeline-subgrid` → `.b-timeline-sub-grid`,
-  `.b-buttongroup` → `.b-button-group`. Full list:
+  `.b-buttongroup` → `.b-button-group`, `.b-sch-header-timeaxis-cell` → `.b-sch-header-time-axis-cell`. Full list:
   `https://bryntum.com/products/<product>/docs-llm/guide/<Product>/migration/migrate-to-new-css.md`.
-- Prefer CSS variables over selector overrides.
+- Prefer CSS variables over selector overrides. One exception: `--b-grid-header-padding` sets both the header text's
+  `padding-block` and the header's `padding-inline`, so shrinking it moves the header labels sideways, out of line with
+  the cells. For a shorter header, set `.b-grid-header-text { padding-block }` instead.
 
 ## Colors
 
@@ -70,12 +62,49 @@ data-driven.
 - Named colors in 7.3: `--b-color-red`, `-orange`, `-amber`, `-lime`, `-green`, `-teal`, `-cyan`, `-blue`, `-indigo`,
   `-purple`, `-magenta`, `-pink`, `-brown`, `-gray`, `-black`.
 - Renderer-injected inline backgrounds → `eventColor` (event or resource field) + `eventStyle`.
-- Override variables on `:root` (or a wrapper class) rather than targeting internal selectors.
+- Override variables on `:root` (or a wrapper class) rather than targeting internal selectors. Some are re-declared
+  per widget, so an inherited value never arrives: Stockholm sets `--b-panel-header-background`/`-color` on
+  `.b-bryntum:not(.b-nothing)`, and core CSS sets `--b-panel-header-padding` on `.b-grid-base`. Set those on the widget
+  itself with higher specificity: `.my-wrapper :is(.b-panel, .b-panel-header):not(.b-nothing) { … }`.
 - A brand color with real meaning (the customer's primary color) may stay as a hex value, set once as a variable.
+
+## Ext Classic density in Stockholm
+
+Stockholm is much roomier than Crisp/Neptune (panel header 57px vs ≈36px, toolbar 65 vs 36, column header 42 vs 30,
+rows 32 vs 25). A recipe that matched Crisp to within 2px, scoped to the app wrapper so popups and dialogs keep
+Stockholm sizing:
+
+```css
+.my-wrapper {
+    --b-toolbar-padding : 0.3em 0.6em;
+    --b-button-height   : 2em;
+}
+.my-wrapper :is(.b-panel, .b-panel-header):not(.b-nothing) {
+    --b-panel-header-padding     : 0.7em 0.8em;
+    --b-panel-header-background  : #f5f5f5;   /* Crisp */
+    --b-panel-header-color       : #157fcc;   /* Crisp */
+    --b-panel-header-font-weight : 300;
+    --b-panel-header-font-size   : 15px;
+}
+.my-wrapper .b-grid-header-text { padding-block : 0.55em; }
+.my-wrapper .b-grid-base { --b-grid-cell-padding-inline : 10px; }   /* Crisp's cell padding */
+```
+
+Plus `rowHeight : 26` on the grid and `features : { group : { headerHeight : 30 } }`. Only aim for the old density
+when the user asks for it, and list it in the report either way.
+
+To make dialogs compact too, give the Popup a `cls` and add:
+
+```css
+.my-dialog {
+    --b-text-field-input-height : 2em;
+    --b-container-gap           : 0.45em;
+    --b-button-height           : 2em;
+}
+.my-dialog .b-panel-header:not(.b-nothing) { /* the same --b-panel-header-* values as above */ }
+```
 
 ## Verification
 
-- no `.x-*` selectors remain; no Ext stylesheet is loaded
-- icons (FontAwesome) render in the dev server, not just the build
-- the app font is intentional (the app's own font, or Poppins per the core skill when there is none)
-- no rules that only restate theme defaults; no hex/rgb colors except intentional brand/domain colors
+Beyond the checklist in `templates.md`: the app font is a deliberate choice (the app's own font, or Poppins per the
+core skill), and no hex/rgb colors remain apart from intentional brand/domain colors.

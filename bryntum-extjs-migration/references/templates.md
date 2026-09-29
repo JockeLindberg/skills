@@ -1,4 +1,22 @@
-# Plan, report and verification templates
+# Inventory, plan, report and verification
+
+## Inventory checklist
+
+Read every file in scope and give each item its own row in the plan:
+
+- app shell: `Ext.application`, controllers, `Viewport`, `requires`
+- every `Ext.define`: views, models, stores, plugins, overrides
+- root widget configs, every `plugins` entry, every column (`xtype`, `dataIndex`, `filter`, editor)
+- renderers and templates: `eventRenderer`, `taskBodyTemplate`, `getRowClass`, `*Tpl`
+- toolbars, buttons and their handlers; dialogs and forms
+- stores, models and proxies, plus the data they load; product structures (calendars, baselines, assignments,
+  dependencies)
+- ViewModel bindings, localization, undo/redo, custom CSS
+
+Also record the toolkit (Classic / Modern), Ext version, build (Sencha Cmd or other) and backend proxies.
+
+A workable conversion order: root widget + data hub → configs → plugins → columns → renderers → toolbars/dialogs →
+models → app logic → extras → styling.
 
 ## MIGRATION_PLAN.md
 
@@ -62,8 +80,7 @@ Include every dropped CSS rule with its bucket (Ext chrome / theme mimicry / dea
 
 ## Verification checklist
 
-Run against both `npm run build` output and the dev server. Headless Chromium via Playwright; drive the UI like a user
-(real clicks, right-clicks, typing). Helper APIs that open menus/editors programmatically skip logic and don't count.
+Check both the `npm run build` output and the dev server, using headless Chromium via Playwright.
 
 Load and data:
 
@@ -95,6 +112,11 @@ Look:
 
 - [ ] no Ext stylesheet or `.x-*` selector remains
 - [ ] theme and font are as planned; no leftover Ext colors on Bryntum internals
-- [ ] screenshots taken after popups/tooltips close; compared with the original; differences listed in the report
+- [ ] screenshots taken after popups/tooltips close and after show animations finish (a popup or toast captured
+  mid-animation looks semi-transparent); compared with the original; differences listed in the report
+- [ ] original won't run because the Ext/Sch vendor files are missing (common: Sch/Gnt are commercial)? In a scratch
+  copy, load the Ext JS GPL build from cdnjs (`extjs` 6.2.0 / 6.0.x / 4.2.1: `ext-all-debug.js` plus the theme's
+  `theme-*.js` and `theme-*-all.css`) and stub the `Sch.*`/`Gnt.*` views with placeholder panels. This covers the
+  non-scheduler screens only
 
-Fix and repeat at most 5 times. If checks still fail, stop and report exactly what fails.
+After about 5 fix-and-recheck rounds, stop and report exactly what still fails.

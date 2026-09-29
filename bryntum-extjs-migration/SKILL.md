@@ -13,211 +13,113 @@ metadata:
 
 # Ext JS → Bryntum migration
 
-Converts an Ext JS app (Classic or Modern toolkit) into a Bryntum 7 app with no Ext JS left, or — when the user wants
-an incremental path — replaces the Ext components first and removes the Ext shell later.
+Turns an Ext JS app (Classic or Modern) into a Bryntum 7 app with no Ext left. For an incremental path, the Ext
+components are replaced first and the Ext shell is removed afterwards.
 
-Always load the core `bryntum` skill too, plus the framework skill for the target (`bryntum-react`,
-`bryntum-angular`, `bryntum-vue`, `bryntum-vanilla`). If the migration has a real backend, load `bryntum-crud`;
-if it customizes the event/task editor, load `bryntum-editor`.
+Load the core `bryntum` skill and the target's framework skill as well. Add `bryntum-crud` for a real backend and
+`bryntum-editor` when the app customizes the event/task editor.
 
-Reference files (read only what the current app needs — don't load them all up front):
+Read only the references the app needs:
 
 | File | Use it for |
 |---|---|
-| `references/api-mapping.md` | Ext class / config / plugin / column / method → Bryntum, **and** things with no equivalent |
+| `references/api-mapping.md` | Ext class / config / plugin / column / method → Bryntum, what has no equivalent, and outdated advice to ignore |
 | `references/data-migration.md` | Models, stores, field mapping vs data conversion, CrudManager, Gantt data changes |
 | `references/patterns.md` | Idiom rewrites: app shell, classes, toolbars, dialogs, editors, renderers, locales, undo/redo, framework targets |
 | `references/styling.md` | Theme choice, dropping Ext chrome, selector renames, color tokens |
-| `references/products/<product>.md` | Product-specific rules and support level: `grid`, `scheduler`, `schedulerpro`, `gantt` |
-| `references/templates.md` | `MIGRATION_PLAN.md` / `MIGRATION_REPORT.md` formats and the verification checklist |
+| `references/products/<product>.md` | Product-specific gotchas and support level: `grid`, `scheduler`, `schedulerpro`, `gantt` |
+| `references/templates.md` | Inventory checklist, `MIGRATION_PLAN.md` / `MIGRATION_REPORT.md` formats, verification checklist |
 
-Finished, verified migrations (Bryntum's own Ext demos) live in the
+Finished, verified migrations of Bryntum's own Ext demos are in the
 [extjs-migration-agent examples](https://github.com/bryntum/extjs-migration-agent/tree/main/examples). Use the closest
-one as a structural model, not as a feature checklist.
+one as a model for structure. They don't cover every feature your app may need. The repo is currently internal to
+Bryntum. If you can't reach it, work from `references/`, where `patterns.md` inlines the dialog pattern.
 
----
+## Principles
 
-## Rules (always)
+- **Only use names you can confirm.** Old Ext → Bryntum material is full of plausible names that don't exist in 7.x.
+  Look names up in this order: `references/` (verified against 7.3.7), then `mcp__bryntum__search_bryntum_docs` for
+  the installed version, then the package source in `node_modules/@bryntum/`. If none of these confirms a name, treat
+  the item as **unmapped**: leave a `// MIGRATION:` comment where it was and list it in the report.
+- **Report every loss.** Anything removed, changed or unmapped goes in the report with a reason. Count the key records
+  before and after, and include both counts in the report.
+- **Write to a new folder or branch**, not over the original app. The team needs the original to compare against.
+- **Write idiomatic Bryntum, not an Ext emulation.** Use features, keyed `items` + `widgetMap`, and a shared
+  store/project. Don't build a compatibility layer for `Ext.*` APIs.
+- **Check with the user before a big job.** Show the plan's mapped/changed/unmapped counts before writing code for
+  anything larger than one screen. Stop and ask if more than a third of the items are unmapped, or if the app needs a
+  backend you can't run.
 
-1. **Never invent a name.** Every class, config, feature, field, column type and CSS class must come from the
-   references here, the Bryntum MCP docs (`mcp__bryntum__search_bryntum_docs` with the installed `version`), the
-   Bryntum docs, or the installed package's source. If none confirm it, it is **unmapped**: leave a
-   `// MIGRATION:` comment where it was and list it in the report.
-2. **Never edit the original app in place.** Write to a new sibling folder, or to a new git branch if the user
-   prefers in-repo migration. Never `rm -rf` anything.
-3. **Never silently drop behavior.** Anything removed, changed or unmapped goes in the report with a reason.
-4. **Keep the data working.** Every record, relation and visible behavior the original depends on must load.
-5. **Stop and ask** if more than a third of the inventoried items are unmapped, or if the app depends on a backend
-   you can't run and the user hasn't said how to handle it.
-6. **Don't rebuild Ext.** Bryntum is not a drop-in Ext replacement. Map to idiomatic Bryntum (features, keyed
-   `items`, `widgetMap`, stores/project) — never write a compatibility layer that emulates `Ext.*` APIs.
+## Before starting
 
-### Lookup order
+Ask the user about anything they haven't already told you, and record the answers in `MIGRATION_PLAN.md`:
 
-1. `references/` in this skill (corrected, verified against Bryntum 7.3.7).
-2. Bryntum MCP `search_bryntum_docs` for the installed version, or `bryntum.com/products/{product}/docs/`.
-3. The installed package source (`node_modules/@bryntum/{product}/`).
-4. Nothing found → unmapped. Official Ext-migration guides and older blog posts contain outdated v5/v6 advice; the
-   "Outdated advice" section of `references/api-mapping.md` lists the known traps.
+- **Trial or licensed package.** Trial: `npm install @bryntum/{product}@npm:@bryntum/{product}-trial` (watermarked).
+  Licensed: the `npm.bryntum.com` registry or a local build. `@bryntum/{product}` on public npm is a placeholder. If
+  licensed access fails, do the work that doesn't need the package and mark verification as blocked. Don't switch to
+  the trial without asking.
+- **Target stack**: vanilla + Vite (closest to Ext's config-object style), React, Angular or Vue, in TS or JS.
+- **Big-bang or incremental.** Incremental means Bryntum widgets run inside the Ext shell for a while, with the
+  UMD/module build loaded next to Ext. Confirm the team accepts that interim state.
+- **Backend**: keep the server's JSON shape and map the fields, or change the data to Bryntum's shape.
+- **Scope**: the whole app or named screens. For a large app, migrate one screen end to end as a pilot.
 
----
-
-## Step 0: Ask before starting
-
-Ask these together (skip any the user already answered). Record the answers at the top of `MIGRATION_PLAN.md`.
-
-1. **Trial or licensed package?** Trial: `npm install @bryntum/{product}@npm:@bryntum/{product}-trial` (public npm,
-   watermark). Licensed: Bryntum's private registry (`npm.bryntum.com`) or a local distribution build. The public-npm
-   `@bryntum/{product}` without the registry is a placeholder — never install it. Don't pick silently; if licensed
-   access fails, do all non-install work and mark verification **blocked** rather than switching to trial.
-2. **Target stack?** Vanilla JS + Vite (closest to Ext's config-object style, the default), React, Angular, or Vue.
-   Also: TypeScript or JavaScript (default TypeScript for new apps, per the core skill; match the source if it is a
-   JS codebase the team will keep maintaining).
-3. **Big-bang or incremental?** Big-bang: new app, Ext removed. Incremental: first replace Ext Scheduler/Gantt/grids
-   with Bryntum widgets hosted inside the existing Ext shell (a "Bryntum embedded in Ext" state), then remove the shell
-   screen by screen. Incremental needs the UMD/module build loaded next to Ext; confirm the team accepts that interim.
-4. **Backend?** Keep the existing server and JSON shape (map fields in models), or change the server/data to Bryntum's
-   format. See `references/data-migration.md`.
-5. **Scope?** Whole app, or named screens/views. For large apps, migrate one screen end to end first as a pilot.
-
----
-
-## Step 1: Classify the source
+## Classify the source (per screen — apps are often mixed)
 
 | Type | How to tell | What changes |
 |---|---|---|
-| **A. Legacy Ext Scheduler / Gantt** | `Sch.*`, `Gnt.*` classes, `ptype` plugins, PascalCase data (`StartDate`, `ResourceId`) | Everything: shell, configs, plugins, columns, renderers, **data** |
-| **B. Bryntum embedded in Ext** | `bryntum.<product>.*` globals or wrapper classes (`Bryntum.SchedulerPanel`), an Ext panel around a Bryntum widget, camelCase data | Only the Ext shell and surrounding Ext widgets. The Bryntum configs inside are already right — copy them and re-check against 7.x defaults. Data usually copies as is |
-| **C. Plain Ext components** | `Ext.grid.Panel`, `Ext.tree.Panel`, Ext stores/models, no Bryntum at all | Map to Bryntum `Grid` / `TreeGrid` (see `references/products/grid.md`). Non-grid Ext UI (forms, charts, routing) maps to the target framework or Bryntum widgets |
+| **A. Legacy Ext Scheduler / Gantt** | `Sch.*`, `Gnt.*`, `ptype` plugins, PascalCase data (`StartDate`) | Everything: shell, configs, plugins, columns, renderers, **data** |
+| **B. Bryntum embedded in Ext** | `bryntum.<product>.*` globals or wrappers, an Ext panel around a Bryntum widget, camelCase data | Only the Ext shell. Copy the Bryntum configs inside and re-check them against 7.x defaults. The data usually copies as is |
+| **C. Plain Ext components** | `Ext.grid.Panel`, `Ext.tree.Panel`, no Bryntum | `Grid` / `TreeGrid` (`references/products/grid.md`). Other Ext UI maps to the framework or to Bryntum widgets |
 
-A real app is often a mix: note the type per screen.
+Flag these for a human instead of migrating them by guesswork: Ext Charts, Pivot, `Ext.calendar` (Bryntum Calendar is
+possible, but mark it limited), Ext Direct, routing, and overrides of private Ext/Sch/Gnt internals.
 
-Also identify: toolkit (Classic / Modern), Ext version, Sencha Cmd vs other build, `Ext.app.Application` +
-controllers + ViewModels, backend proxies, locales, custom `Ext.override`s, and anything else in the §8 "No
-equivalent" list of `references/api-mapping.md`.
+## Converting
 
-**Out of scope for this skill** — flag, don't migrate by guesswork: Ext Charts, Ext Pivot, `Ext.calendar` (map to
-Bryntum Calendar only with the core skill + docs, and mark it limited in the report), Ext Direct, routing/history,
-and private Ext/Sch/Gnt internals.
+Build the inventory and plan from the checklist in `references/templates.md`. For scaffolding (install, CSS, sizing,
+Vite `optimizeDeps`), follow the core skill. Points specific to migrations:
 
----
+- Remove every Ext script, stylesheet and build file. Rebuild the styling for Bryntum 7 instead of porting the Ext
+  chrome (`references/styling.md`).
+- Choose **one** data strategy per app, field mapping or conversion (`references/data-migration.md`). Gantt calendars,
+  `TaskType` and baselines can only be converted.
+- Set `barMargin`, `rowHeight`, `viewPreset` and `startDate`/`endDate` explicitly. Their defaults differ from Ext.
+- Convert plugins to `features` only when the mapping is confirmed.
+- Some Bryntum features are on by default that the Ext app may not have had: `cellEdit`, `cellMenu`, `headerMenu`
+  (Grid); `eventEdit`, `eventMenu`, `scheduleMenu`, `eventTooltip`, `enableDeleteKey` (Scheduler). Turn off each one
+  the source lacked, or keep it and list it as a behavior change. `cellEdit` takes over the row double-click that Ext
+  apps often used to open an edit window. `cellMenu`'s "Remove row" and the Delete key both skip any app-level
+  delete confirmation.
+- Ext apps often replaced the event editor with a custom dialog. Customize the built-in `eventEdit`/`taskEdit`
+  instead. Other dialogs become a `Popup` subclass, or the host framework's dialog when the app has its own component
+  system.
+- Controllers and ViewModel `bind` become explicit handlers (vanilla) or framework state.
+- Only add localization, undo/redo or RTL if the source app had them.
+- `@bryntum/demo-resources` and `DemoHeader` belong only in migrations of Bryntum's own demos, never in a customer app.
 
-## Step 2: Inventory and plan
+## Verifying
 
-Read every file in scope. Write `MIGRATION_PLAN.md` (format in `references/templates.md`) with one row per item:
+Use the checklist in `references/templates.md`. Two lessons from past migrations:
 
-| Ext item | Where (file:line) | Bryntum target | Source of mapping | Status (mapped / changed / unmapped) |
+- Run the dev server as well as `npm run build`. Vite's dev server enforces file-serving rules that the build doesn't,
+  so icons and fonts can 404 only in dev.
+- Drive the UI the way a user would, with Playwright clicks, right-clicks and typing. Helpers like
+  `showContextMenuFor()` skip the real code path and prove nothing. For a vanilla target, expose the root widget on
+  `window`. For a framework target, use the wrapper's `instance`.
 
-Checklist: app shell (`Ext.application`, controllers, `Viewport`, `requires`); every `Ext.define` (views, models,
-stores, plugins, overrides); root widget configs; every `plugins` entry; every column (`xtype`, `dataIndex`,
-`filter`, editor); renderers and templates (`eventRenderer`, `taskBodyTemplate`, `getRowClass`, `*Tpl`); toolbars,
-buttons and their handlers; dialogs and forms; stores, models, proxies and the data they load; product data
-structures (calendars, baselines, assignments, dependencies); ViewModel bindings; localization; undo/redo; custom CSS.
-
-Show the user the plan summary (counts of mapped / changed / unmapped, plus the unmapped list) before writing code
-on anything bigger than a single screen.
-
----
-
-## Step 3: Scaffold
-
-Follow the core `bryntum` skill for install, CSS, sizing and Vite `optimizeDeps`, and the framework skill for the
-component wrapper. Migration-specific points:
-
-- **CSS: plain CSS `@import`**, as the core skill requires — FontAwesome, `{product}.css`, one theme, then app
-  rules. No SASS. Remove every Ext script and stylesheet (`ext-all.js`, `bootstrap.js`, `app.json`, theme packages).
-- **Theme**: pick the closest to the app's look — `stockholm-light` for classic Ext "Neptune/Triton" apps,
-  `material3-*` for Ext Modern Material, else `svalbard-light`. See `references/styling.md`.
-- **Keep the app's identity**: page title, meta description, favicon, visible labels.
-- **Bryntum's own demos only**: when migrating an official Bryntum Ext demo, use `@bryntum/demo-resources` and
-  `DemoHeader` like the examples repo does (its stylesheet is `scss/example.scss`, so this is the one case that adds
-  `sass`). Never add them to a customer app.
-
-Checkpoint: an empty root widget renders with the theme applied.
-
----
-
-## Step 4: Data
-
-Pick **one** strategy per app and record it in the plan (details in `references/data-migration.md`):
-
-1. **Field mapping** — keep the server/JSON; declare fields with `dataSource` on models or store `fields`. Default
-   when a backend exists that the user doesn't want to change.
-2. **Data conversion** — convert to Bryntum's camelCase fields and structures. Required for Gantt structural changes
-   (calendars, `TaskType`, baselines) that can't be expressed as field mappings. For static JSON, use a checked-in
-   conversion script.
-
-Count the important records before and after, and record the counts in the report. Ext proxies → CrudManager
-(Scheduler, Scheduler Pro, Gantt) or store `readUrl`/`createUrl`/… (Grid); anything beyond plain AJAX/JSON/REST is
-flagged for a human.
-
----
-
-## Step 5: Convert, item by item
-
-Work through the plan in this order, checking each item against `references/api-mapping.md` then
-`references/products/<product>.md`, then docs:
-
-1. **Root widget and data hub** — `new Scheduler/Gantt/Grid(...)` (or the framework component) with its stores or
-   `project`. Share one store/project between related widgets.
-2. **Configs** — for each: unchanged? renamed? now a feature? obsolete? Set `barMargin`, `rowHeight`, `viewPreset`,
-   `startDate`/`endDate` explicitly; defaults differ from Ext.
-3. **Plugins → `features`**, only when the mapping is confirmed.
-4. **Columns** — `header` → `text`, `dataIndex` → `field`, `xtype` → `type`, editors → `editor`.
-5. **Renderers and templates** — functions returning template literals; escape user data with the `StringHelper.xss`
-   tagged template; convert Ext (PHP-style) date tokens to `DateHelper` (moment-style) tokens.
-6. **Toolbars, menus, dialogs** — keyed `items` + `widgetMap`; `handler` → `onClick`/`onAction` (`'up.method'`);
-   custom Ext event editors → the built-in `eventEdit`/`taskEdit` customized via `items`; other dialogs → a `Popup`
-   subclass (vanilla) or the host framework's dialog (React/Angular/Vue app with its own component system — see the
-   widget-first rule in the core skill).
-7. **Models and editors** — subclass the product model only for fields the app really uses.
-8. **App logic** — controllers and ViewModel `bind` → explicit handlers (`onChange`, `selectionChange`) in vanilla,
-   or framework state (React state, Angular signals/inputs, Vue refs) in a framework target.
-9. **Extras only if the source had them** — localization, undo/redo, side panels, RTL.
-10. **Styling** — rebuild for Bryntum 7; don't port Ext chrome. Keep only colors/styles with domain meaning.
-
----
-
-## Step 6: Verify (do not skip)
-
-Full checklist in `references/templates.md`. At minimum:
-
-1. `npm run build` passes **and** the dev server runs with no console errors or warnings (Vite's dev server enforces
-   file-serving rules the build doesn't — icons/fonts can 404 only in dev).
-2. Open the app in a headless browser (Playwright) and **drive it like a user** — real clicks, typing, right-clicks.
-   Helper APIs like `showContextMenuFor()` skip logic and prove nothing. Check: store/project counts match the data
-   counts; every planned column and feature exists; toolbar buttons have their effect; editors/dialogs open with the
-   right title and values, validate, save and cancel; no blank menu items; test targets are on screen.
-3. Compare against the original (screenshots or the running Ext app) and list visible differences.
-4. Fix and repeat, at most 5 loops. If it still fails, stop and report what fails.
-
-For a vanilla target, expose the root widget and data hub on `window` so checks can inspect them. For frameworks, use
-the wrapper's `instance` ref.
-
----
-
-## Step 7: Report
-
-Write `MIGRATION_REPORT.md` (format in `references/templates.md`): source/target/status and package line; file-by-file
-table; config mapping table with the source of each mapping; data counts before/after and structural changes;
-unmapped/dropped items with reasons (including dropped CSS rules); behavior differences; verification results.
-
-Then follow the core skill's "Verify" hand-off: leave the dev server running, and suggest real Bryntum features
-the old Ext app didn't have (name them and link to `https://bryntum.com/products/{product}/docs/`).
-
----
+Then write `MIGRATION_REPORT.md` (`references/templates.md`). Follow the core skill's hand-off, and suggest Bryntum
+features the Ext app didn't have.
 
 ## Traps
 
-- Official Ext → Bryntum guides predate 7.x in places (`tplData`, `extraItems` + `index`, `showResourceField`,
-  assignment `taskId`/`resourceId`, `material2` themes, `.b-rownumber-cell`). Trust `references/api-mapping.md`.
-- 7.x renamed CSS classes to kebab-case (`.b-timeline-subgrid` → `.b-timeline-sub-grid`). Translate any copied
-  selectors.
-- `items : { someBuiltIn : true }` on a menu/editor **replaces** the built-in item config (blank menu text). Only
-  override the properties you change, or set `false`/`null` to remove.
-- Setting `eventEdit`/`taskEdit` to `false` removes the `beforeEventEdit` hook — to use a custom dialog, keep the
-  feature and return `false` from the hook (see `bryntum-editor`).
-- A 7.x store `grouper.field` must be a field name — a function throws. Use a calculated field for computed groups.
-- Don't assume a mapping from one product holds for another (Scheduler `eventRenderer` vs Gantt `taskRenderer`).
-- When switching trial ↔ licensed, move `package-lock.json` and `node_modules/` aside first; the lockfile silently
-  keeps the old source.
+- The official Ext → Bryntum guides and old blog posts predate 7.x in places. `references/api-mapping.md` §9 lists the
+  corrections.
+- `items : { someBuiltIn : true }` on a menu or editor **replaces** the built-in item config, leaving blank menu text.
+  Override only the properties you change, or use `false`/`null` to remove an item.
+- Setting `eventEdit`/`taskEdit` to `false` also removes the `beforeEventEdit` hook. For a custom dialog, keep the
+  feature enabled and return `false` from the hook (`bryntum-editor`).
+- In 7.x, a store `grouper.field` must be a field name, and a function throws. Group on a calculated field instead.
+- A mapping for one product doesn't carry over to another (Scheduler `eventRenderer` vs Gantt `taskRenderer`).
+- When switching between trial and licensed packages, move `package-lock.json` and `node_modules/` aside first. The
+  lockfile silently keeps the old package source.

@@ -27,6 +27,7 @@ Load the relevant skill, or fetch the raw file directly if the skill is not inst
 | Custom event bar content / `eventRenderer` layouts | `bryntum-styling` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-styling/SKILL.md |
 | Customizing the built-in event/task editor popup | `bryntum-editor` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-editor/SKILL.md |
 | Migrating an Ext JS app (Ext Scheduler/Gantt, Bryntum inside Ext, Ext grids) | `bryntum-extjs-migration` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-extjs-migration/SKILL.md |
+
 ---
 
 ## Quick-start guides

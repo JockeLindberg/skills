@@ -46,7 +46,7 @@ Customizing the built-in event/task editor — adding/removing fields and tabs v
 
 ### `bryntum-extjs-migration`
 
-Migrating Ext JS apps to Bryntum 7: legacy Ext Scheduler / Gantt (`Sch.*`, `Gnt.*`), Bryntum components wrapped in an Ext JS shell, and plain Ext grids and tree grids. Targets vanilla JS, React, Angular, or Vue. Covers classifying the source, a migration plan and report, Ext → Bryntum API and plugin mappings, data migration (field mapping vs. conversion, Gantt calendars and baselines), rebuilding styling, and browser verification. Bundles its reference tables in `references/`; finished example migrations live in [bryntum/extjs-migration-agent](https://github.com/bryntum/extjs-migration-agent).
+Migrating Ext JS apps to Bryntum 7 (vanilla JS, React, Angular or Vue): legacy Ext Scheduler / Gantt (`Sch.*`, `Gnt.*`), Bryntum inside an Ext shell, and plain Ext grids and tree grids. Covers Ext → Bryntum API mappings, data migration and verification, with finished examples in [bryntum/extjs-migration-agent](https://github.com/bryntum/extjs-migration-agent).
 
 ---
 

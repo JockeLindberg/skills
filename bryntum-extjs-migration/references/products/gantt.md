@@ -3,18 +3,12 @@
 Support level: **strong** (an official Ext → Bryntum Gantt guide exists; its mappings are corrected and folded into
 `../api-mapping.md` §4–§6, `../data-migration.md`, `../patterns.md`).
 
-Finished example (extjs-migration-agent repo): `gantt-extjsmodern-vite` (Ext hbox + resizable panel → `Container` +
+Finished example (extjs-migration-agent repo, currently internal to Bryntum): `gantt-extjsmodern-vite` (Ext hbox + resizable panel → `Container` +
 `Splitter`, Ext grouped List → Bryntum `List`, wrapper defaults moved onto the Gantt, `ProjectModel` + dataset copy,
 Material3, RTL, fixing a default overwritten by `items : { x : true }`).
 
-## What a Bryntum Gantt app looks like
-
-- `new Gantt({ appendTo, project, columns, features, tbar })`; `project` is mandatory (data + scheduling hub)
-- Gantt `startDate`/`endDate` = visible time axis; `project.startDate` = project start
-- Gantt-native columns (`wbs`, `name`, `startdate`, `duration`, `predecessor`, `addnew`, ...)
-- features: `baselines`, `dependencies`, `dependencyEdit`, `rollups`, `progressLine`, `criticalPaths`, `rowReorder`,
-  `timeRanges`, `fillHandle`, `cellCopyPaste`, `taskCopyPaste`, ...
-- toolbars are `Toolbar` subclasses passed as `tbar : { type : '<name>' }`
+`project` is mandatory and is the data + scheduling hub. Gantt `startDate`/`endDate` set the visible time axis, and
+`project.startDate` is the project start.
 
 ## Rules
 
@@ -75,8 +69,7 @@ me.widgetMap.localeCombo.value      = me.localeManager.locale.localeName;
 
 ### Old zipped copies of the Ext Gantt demos
 
-Don't carry over `@bryntum/gantt ^5.6.12`, combined theme CSS (`gantt.stockholm.css`), a top-level `pan : true`
-(belongs in `features`), or debug `console.log` lines.
+They carry stale 5.x setup. `../api-mapping.md` §9 lists what to correct. Also drop their debug `console.log` lines.
 
 ## Both types supported
 

@@ -2,28 +2,24 @@
 
 Support level: **moderate** (no official Ext guide; follows the Scheduler shape plus a project-centric data layer).
 
-Finished example (extjs-migration-agent repo): `schedulerpro-extjsmodern-vite` (the Scheduler template plus a `project`
+Finished example (extjs-migration-agent repo, currently internal to Bryntum): `schedulerpro-extjsmodern-vite` (the Scheduler template plus a `project`
 hub with calendars, assignments and dependencies, percent bars, grouped resources,
 `eventStore.isDateRangeAvailable()` overlap checks).
 
-## What a Bryntum Scheduler Pro app looks like
-
-- `new SchedulerPro({ appendTo, project, columns, features, viewPreset, startDate, endDate, eventRenderer, tbar })`
-- `project` holds `resources`, `events`, `assignments`, `dependencies`, `calendars` and runs the scheduling engine
-- events have `startDate` + `duration`; `endDate` is derived; dependencies cascade
+`project` holds `resources`, `events`, `assignments`, `dependencies` and `calendars`, and runs the scheduling engine.
+Events have `startDate` + `duration`. `endDate` is derived, and dependencies cascade.
 
 ## Rules
 
-1. **Reuse Scheduler for everything UI-shaped** — wrapper removal, shell, configs, toolbars, popups, renderers,
-   `resourceTimeRanges`, dependency editor/menus. If a Scheduler mapping isn't contradicted by Scheduler Pro evidence,
-   it holds.
-2. **`project` is core data.** When the source has dependencies, assignments, calendars or constraint/effort behavior,
-   use a `project` rather than ad hoc stores, and don't mark the migration complete if that behavior depends on
-   dropped data.
-3. **Pro-only behavior must be verified.** Dependency editing/highlighting, resource time ranges, calendar-driven
-   scheduling and constraint/effort calculations: only claim them migrated with a verified mapping or an explicit
-   product example/doc page; otherwise record the assumption in the report.
-4. The editor feature is `taskEdit` (not `eventEdit`).
+- For anything UI-shaped, reuse the Scheduler mapping: wrapper removal, shell, configs, toolbars, popups,
+  renderers, `resourceTimeRanges`, dependency editor/menus. A Scheduler mapping holds unless Scheduler Pro evidence
+  contradicts it.
+- `project` is core data. When the source has dependencies, assignments, calendars or constraint/effort behavior, use a
+  `project` rather than ad hoc stores. The migration isn't complete while that behavior depends on dropped data.
+- Pro-only behavior needs evidence: dependency editing/highlighting, resource time ranges, calendar-driven scheduling,
+  and constraint/effort calculations. Claim one as migrated only with a verified mapping or a product example/doc page.
+  Otherwise record the assumption in the report.
+- The editor feature is `taskEdit`, not `eventEdit`.
 
 ## Limits
 
