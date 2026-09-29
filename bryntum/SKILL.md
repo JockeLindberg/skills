@@ -23,7 +23,7 @@ Load the relevant skill, or fetch the raw file directly if the skill is not inst
 | Backend / CRUD / data persistence | `bryntum-crud` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-crud/SKILL.md |
 | Drag from a sidebar/list/grid onto the timeline | `bryntum-drag-and-drop` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-drag-and-drop/SKILL.md |
 | Theme catalog, dark mode, or runtime theme switching | `bryntum-theming` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-theming/SKILL.md |
-| Custom event bar content / `eventRenderer` layouts | `bryntum-styling` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-styling/SKILL.md |
+| Custom event bar content / `eventRenderer` layouts, widget `rendition` (button/field looks), form look | `bryntum-styling` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-styling/SKILL.md |
 | Customizing the built-in event/task editor popup | `bryntum-editor` | https://raw.githubusercontent.com/bryntum/skills/refs/heads/main/bryntum-editor/SKILL.md |
 
 ---
