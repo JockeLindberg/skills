@@ -9,7 +9,7 @@ Idiom-level rewrites. Tags as in `api-mapping.md`. Examples use vanilla JS; §10
 - Remove every Ext script and stylesheet: `ext-all.js`, `bootstrap.js`, `app.json`, `classic.json`/`modern.json`,
   Sencha Cmd output, theme packages. (G-S)
 - Ext layouts (`border`, `vbox`, `hbox`, `fit`) → a Bryntum `Container` with `layout : 'hbox'`/`'vbox'` and `flex`
-  on children, or CSS flexbox in a framework app. `split : true` → `{ type : 'splitter' }` between items. (G-G, SRC)
+  on children (for pure layout wrappers), or `Panel` if the layout container has panel features (header, tools). In a framework app, use CSS flexbox instead. `split : true` → `{ type : 'splitter' }` between items. (G-G, SRC)
 - Multiple views sharing data → share one store or `project` instance. (G-G)
 - Controller logic listening to global events → methods on a custom widget (e.g. a `Toolbar` subclass), plain
   functions, or framework services/hooks.

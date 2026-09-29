@@ -28,9 +28,9 @@ Product-specific rows only apply to that product. Don't generalize a Gantt row t
 | `Ext.create('X', cfg)` | `new X(cfg)` or `Widget.create(cfg)` | | G-G |
 | `xtype` | `type` | | G-G |
 | `ptype` / `ftype` plugins | `features : { name : true \| {config} }` | Toggle at runtime via `feature.disabled` | G-G |
-| `Ext.panel.Panel` / `Ext.container.Container` | `Panel` / `Container` | | SRC |
+| `Ext.panel.Panel` / `Ext.container.Container` | `Panel` / `Container` | Use `Panel` for panels with features (header, tools); use `Container` for pure layout wrappers | SRC |
 | `Ext.tab.Panel` | `TabPanel` | | DOC |
-| `Ext.Viewport` / hbox panel | `new Container({ appendTo, layout : 'hbox' })` | | SRC |
+| `Ext.Viewport` / hbox panel | `new Panel({ appendTo, layout : 'hbox' })` | Viewport becomes a Panel when migrating; pure layout containers use `Container` with `layout` | SRC |
 | panel `resizable : { split : true }` / `split : true` | `{ type : 'splitter' }` item between panels | | SRC |
 | `Ext.Toolbar` / `dockedItems` / `tbar` | `tbar` / `bbar` on the widget, or a `Toolbar` subclass | Keyed `items : { myButton : {...} }`, access via `widgetMap` | G-G, SRC |
 | panel `header : { items }` | Panel `tools` | Any widget config | SRC |
