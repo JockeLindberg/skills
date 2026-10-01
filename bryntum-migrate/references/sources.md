@@ -53,7 +53,7 @@ Reading list: every release in `(installed, target]`, ascending; per release, ev
 
 Changelogs have no "BREAKING CHANGES" section — breaking changes are in `API CHANGES`, `STYLING CHANGES`, and the upgrade guides. Entries look like `* Fixed #12206 - ...`.
 
-Sibling products repeat each other: the same section (e.g. 7.3.0 "`content: var(--fa)` removed") appears word for word in the Grid, Scheduler, Scheduler Pro and Gantt guides. Read a repeated heading once. The reading-list table in the plan gets long (100+ rows for Gantt 6.0 → 7.3); collapse consecutive releases that only have bug fixes into one row per product.
+Sibling products repeat each other: the same section (e.g. 7.3.0 "`content: var(--fa)` removed") appears word for word in the Grid, Scheduler, Scheduler Pro and Gantt guides. Skip a section only after confirming its full content repeats one already read, not just its heading. For example, Grid and Scheduler 7.0.0 both have "Individual animation related configs deprecated", but Scheduler adds `enableEventAnimations` → `transition.changeEvent`, which Grid's section doesn't cover. The reading-list table in the plan gets long (100+ rows for Gantt 6.0 → 7.3); collapse consecutive releases that only have bug fixes into one row per product.
 
 ## Future path: the migration index
 
