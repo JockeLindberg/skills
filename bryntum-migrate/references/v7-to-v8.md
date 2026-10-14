@@ -1,9 +1,9 @@
 # 7.x → 8.x hop
 
-Applies when `installed < 8.0.0 <= target`. The 8.0.0 upgrade guides cover the API changes, but not the package rename
-below: their code samples, the integration and quick-start guides and the wrapper packages' READMEs still use 7.x
-names (`@bryntum/<product>`, `-vue-3`, `-thin`). Take package names, import paths and CSS paths from this file, the
-product package's `README.md` / `AGENTS.md`, and the wrapper's exports (`src/index.ts`, `public-api.d.ts`).
+Applies when `installed < 8.0.0 <= target`. Each 8.0.0 upgrade guide opens with the package rename, but other docs
+(integration and quick-start guides, the wrapper packages' READMEs) can still show 7.x names (`@bryntum/<product>`,
+`-vue-3`, `-thin`). Take package names, import paths and CSS paths from this file, the upgrade guide, the product
+package's `README.md` / `AGENTS.md`, and the wrapper's exports (`src/index.ts`, `public-api.d.ts`).
 
 ## Every package is renamed: `@bryntum/<product>-<tier>`
 
@@ -60,9 +60,8 @@ the inherited packages too: in Angular `BryntumGridModule` + `BryntumSchedulerMo
 (and `BryntumCoreModule` for `<bryntum-demo-header>`), as the wrapper README's Quick Start does; elsewhere an
 `import '@bryntum/scheduler-<tier>'`. A green build proves nothing here, so check the console for errors.
 
-The owning packages arrive as dependencies of the product package. The package `AGENTS.md` says not to add them to
-`package.json`, which works with npm and Yarn hoisting but not with pnpm strict mode or Yarn PnP. Ask the customer
-when the app imports from one, and record the answer.
+The owning packages arrive as dependencies of the product package. Add each one the app imports from to
+`package.json` at the same version: strict package managers (pnpm, Yarn PnP) only resolve declared dependencies.
 
 ## CSS and FontAwesome
 
@@ -137,13 +136,11 @@ Also read the 8.0.0 changelogs' `[BREAKING]` / `[DEPRECATED]` entries: some chan
 |--------|----------------------------|
 | Project is a CrudManager; `crudManager` config and standalone `CrudManager` deprecated | `crudManager`, `new CrudManager` |
 | Colors emit `b-` names (`b-red`); helpers that build `var(--b-color-${color})` break | `eventColor`, `color :`, `--b-color-`, `ColorField` |
-| Temporal time zones are the default (see below); `TimeZoneHelper` deprecated, only its API doc says so | `timeZone`, `TimeZoneHelper` |
-| `smoothZoom` deprecated, never logs (smooth zoom is the default); `zoomFactor` 2 → 1.5 (changelog only) | `smoothZoom`, `zoomFactor` |
+| Temporal time zones are the default (see below); `TimeZoneHelper` deprecated | `timeZone`, `TimeZoneHelper` |
+| `smoothZoom` deprecated, never logs (smooth zoom is the default); `zoomFactor` 2 → 1.5 | `smoothZoom`, `zoomFactor` |
 | `amPm` preset → `sixHoursAndDay`; vendored `later.js` removed | `amPm`, `later.` |
 | `GridFeatureManager` removed (features use `Factoryable`) | `GridFeatureManager`, `registerFeature` |
-| Columns virtualized, `autoAddField` on, group rows indented, overscroll off, `detectEventBarLayoutIssues` on (new defaults) | always list under *Default behaviour changes* |
-| Former Scheduler Pro: `rowCopyPaste` is on (it was off for Scheduler Pro in 7.x, no guide says so) | opt out: `features : { rowCopyPaste : false }` (wrapper prop `rowCopyPasteFeature`) |
-| Themes also ship as family sheets (`svalbard.css`), optional | theme `<link>` / `@import` |
+| Columns virtualized, `autoAddField` on, group rows indented, overscroll off, `detectEventBarLayoutIssues` on (new defaults) | always list under *Default behaviour changes* || Themes also ship as family sheets (`svalbard.css`), optional | theme `<link>` / `@import` |
 | Product extras named in each guide (Gantt `toggleParentTasksOnClick`, Calendar DayView sticky content and YearView cells, renderer argument order, ...) | whatever the heading names |
 
 ### Time zone code
