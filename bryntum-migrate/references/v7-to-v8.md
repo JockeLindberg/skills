@@ -5,11 +5,24 @@ Applies when `installed < 8.0.0 <= target`. Each 8.0.0 upgrade guide opens with 
 `-vue-3`, `-thin`). Take package names, import paths and CSS paths from this file, the upgrade guide, the product
 package's `README.md` / `AGENTS.md`, and the wrapper's exports (`src/index.ts`, `public-api.d.ts`).
 
+## Registry prerequisite
+
+8.x installs from public npm (`https://registry.npmjs.org/`), unless the user supplies a local or other target registry.
+Before checking package availability or packing the target, pass `--@bryntum:registry=<target-registry>` to `npm view`
+and `npm pack`. This overrides an old scoped mapping to `npm.bryntum.com` or `npm-us.bryntum.com`; `--registry` alone
+does not. These command-line overrides leave the customer's configuration unchanged while the plan is prepared.
+
+Include project and CI registry changes in the plan: override or remove the old Bryntum mapping in `.npmrc` or Yarn's
+`.yarnrc.yml` so the eventual install uses the selected target registry. Check inherited user configuration too; avoid
+changing shared user settings that other 7.x apps still need. Apply approved project and CI changes before installing.
+Read the full `docs-llm/guide/<Product>/migration/migrate-from-v7-to-v8.md` guide linked from the 8.0.0 upgrade guide
+for registry migration and license-key setup.
+
 ## Every package is renamed: `@bryntum/<product>-<tier>`
 
 8.0 ships each product in three cumulative tiers, `community < business < enterprise`, and the tier is part of every
-package name. No untiered name gets an 8.0 version, so `npm view @bryntum/<product>@8.0.0` returns E404 and its
-`latest` tag stays on 7.x. That is expected, not a missing release.
+package name. Query the tiered name for 8.x: untiered names on the private registry stay on 7.x, while public npm can
+have untiered placeholder packages without product code.
 
 | 7.x package | 8.0 package |
 |-------------|-------------|

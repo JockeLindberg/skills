@@ -17,8 +17,10 @@ Blockers: none | <Vue 2 wrapper, Angular < 15, UMD, target not published> (stop 
 
 ## Actions (in version order)
 ### Packages
-- [ ] **Rename and bump every `@bryntum/*` package to exactly `<to>`** (incl. `@bryntum/demo-resources`)
+- [ ] **For 8.x, configure the selected target registry in the project and CI before installing** (`v7-to-v8.md`; preserve a supplied local registry)
+- [ ] **Rename and bump Bryntum product, wrapper and `@bryntum/demo-resources` packages to exactly `<to>`**
   Files: `package.json`, lockfile · first update any `postinstall` script that copies Bryntum files
+  For targets below 8.0, preserve trial aliases and use each target product's required `*-lib` / `*-lib-trial` versions for direct helper pins; for 8.x, remove obsolete direct helper dependencies.
 - [ ] **Imports and CSS paths** from the packed target package (owning package per class, FontAwesome, themes)
 
 ### <version> — <Product>
@@ -48,6 +50,7 @@ Blockers: none | <Vue 2 wrapper, Angular < 15, UMD, target not published> (stop 
 </details>
 
 ## Verification
+- [ ] Product, wrapper and `demo-resources` versions match `<to>`; 7.x helper versions match the target product's dependencies
 - [ ] Build / typecheck: `<command>`
 - [ ] Grep for removed identifiers returns zero hits: …
 - [ ] Tests: `<command>` (if present)
