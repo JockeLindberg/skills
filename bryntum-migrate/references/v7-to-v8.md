@@ -32,17 +32,13 @@ plan, with the lowest tier the app needs. For Scheduler Pro, only confirm Enterp
   lists the classes that need more than Community (for example Grid's `Group` feature is Business). A lower-tier
   package doesn't contain higher-tier classes: an imported class fails the build, a feature enabled by config fails
   at runtime (`Invalid type name`).
-- **Enterprise can change behaviour, not only add features.** Calendar Enterprise swaps in the scheduling engine
-  (event dates are calculated, `EventModel` resolves to `EventModelEnterprise`, the editor can become `TaskEdit`), and
-  is also the only Calendar tier with ResourceView, DayAgendaView, MonthGrid, YearPlanner and MultiWeekView. To keep
-  7.x behaviour on an Enterprise licence, run the widget at the lowest tier that has everything the app uses. Read
-  the product's `guides/data/tiers.md` (docs-llm) for what each tier adds; feature tiers are in `static tier`
+- Read the product's `guides/data/tiers.md` (docs-llm) for what each tier adds. Feature tiers are in `static tier`
   (Calendar also has `CalendarFeature.featureTiers`), widget and config tiers only in `@tier` source comments.
-- **`tier : 'business'` alone is not enough for Calendar.** It keeps the Enterprise project and crashes
-  (`this.project?.invalidate is not a function`). Also set `projectModelClass : ProjectModelBusiness` and base custom
-  models on the tier class (`class AppEvent extends EventModelBusiness`), both from `@bryntum/scheduler-<tier>`. The
-  typings describe Enterprise classes only, so TypeScript needs `as unknown as typeof ProjectModel` style casts.
-  Verify at runtime: `calendar.project.constructor.name`, and which editor opens on double-click.
+- **Calendar and TaskBoard keep the basic data layer at every tier**, as in 7.x: their models and project resolve to
+  the Business classes even in the Enterprise package. Calendar's Enterprise tier adds the DayAgendaView, ResourceView,
+  DayResourceView, MonthAgendaView, MonthGrid, YearPlanner and MultiWeekView modes; the scheduling engine is opt-in,
+  through an explicit `ProjectModelEnterprise` project. Base custom models on the plain names Calendar and TaskBoard
+  export themselves (`EventModel`, `ResourceModel`, ...), not on Scheduler's.
 
 ## Imports: the product package no longer re-exports what it is built on
 
