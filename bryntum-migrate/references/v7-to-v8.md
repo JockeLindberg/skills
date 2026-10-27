@@ -1,9 +1,12 @@
 # 7.x → 8.x hop
 
-Applies when `installed < 8.0.0 <= target`. Each 8.0.0 upgrade guide opens with the package rename, but other docs
-(integration and quick-start guides, the wrapper packages' READMEs) can still show 7.x names (`@bryntum/<product>`,
-`-vue-3`, `-thin`). Take package names, import paths and CSS paths from this file, the upgrade guide, the product
-package's `README.md` / `AGENTS.md`, and the wrapper's exports (`src/index.ts`, `public-api.d.ts`).
+Applies when `installed < 8.0.0 <= target`. Read the product's v7 to v8 migration guide first
+(`docs-llm/guide/<Product>/migration/migrate-from-v7-to-v8.md`, linked from the top of each 8.0.0 upgrade guide; the
+migration index does not list it). It covers the registry, the package names, the imports, the stylesheets and the
+license key; the upgrade guides hold the API and styling changes. Other docs (integration and quick-start guides, the
+wrapper packages' READMEs) can still show 7.x names (`@bryntum/<product>`, `-vue-3`, `-thin`). Take package names,
+import paths and CSS paths from this file, the migration guide, the product package's `README.md` / `AGENTS.md`, and
+the wrapper's exports (`src/index.ts`, `public-api.d.ts`).
 
 ## Registry prerequisite
 
@@ -13,10 +16,9 @@ and `npm pack`. This overrides an old scoped mapping to `npm.bryntum.com` or `np
 does not. These command-line overrides leave the customer's configuration unchanged while the plan is prepared.
 
 Include project and CI registry changes in the plan: override or remove the old Bryntum mapping in `.npmrc` or Yarn's
-`.yarnrc.yml` so the eventual install uses the selected target registry. Check inherited user configuration too; avoid
-changing shared user settings that other 7.x apps still need. Apply approved project and CI changes before installing.
-Read the full `docs-llm/guide/<Product>/migration/migrate-from-v7-to-v8.md` guide linked from the 8.0.0 upgrade guide
-for registry migration and license-key setup.
+`.yarnrc.yml` (`npmScopes`), and any `npm login` step for it in CI scripts, so the eventual install uses the selected
+target registry (migration guide step 1). Check inherited user configuration too; avoid changing shared user settings
+that other 7.x apps still need. Apply approved project and CI changes before installing.
 
 ## Every package is renamed: `@bryntum/<product>-<tier>`
 
@@ -31,15 +33,16 @@ have untiered placeholder packages without product code.
 | `@bryntum/<product>-vue-3` (and `-vue-3-thin`) | `@bryntum/<product>-vue-<tier>`, `vue` with no `-3` |
 | `@bryntum/schedulerpro*` | `@bryntum/scheduler-enterprise`, `@bryntum/scheduler-<framework>-enterprise` |
 | `@bryntum/<product>-lib` helpers | gone, the tier packages depend on `@bryntum/core-<tier>`, `grid-<tier>`, ... |
-| `-trial`, `-angular-view`, `-vue` (Vue 2) | not published for 8.0, see the blockers below |
+| `@bryntum/<product>-trial` (and its wrappers) | the tier package, which runs as a trial without a license key |
+| `-angular-view`, `-vue` (Vue 2) | not published for 8.0, see the blockers below |
 | `@bryntum/demo-resources` | unchanged name, version follows the product |
 
 `<product>` is `grid`, `scheduler`, `gantt`, `calendar`, `taskboard`, `core`, `chart` or `engine`. Chart has an
 `-enterprise` package only.
 
-**The tier is the customer's licence, so ask.** First check which tiers the customer's registry has
-(`npm view @bryntum/<product>-{community,business,enterprise} version`), then put the question under *Unsure* in the
-plan, with the lowest tier the app needs. For Scheduler Pro, only confirm Enterprise.
+**The tier is the customer's licence, so ask.** Every tier is on the public npm registry, so the registry can't tell
+you which one they bought. Put the question under *Unsure* in the plan, with the lowest tier the app needs. For
+Scheduler Pro, only confirm Enterprise.
 
 - Check what the app uses against the tier of each class in the packed target: `grep -rl "static tier = '" lib/`
   lists the classes that need more than Community (for example Grid's `Group` feature is Business). A lower-tier
@@ -52,6 +55,13 @@ plan, with the lowest tier the app needs. For Scheduler Pro, only confirm Enterp
   DayResourceView, MonthAgendaView, MonthGrid, YearPlanner and MultiWeekView modes; the scheduling engine is opt-in,
   through an explicit `ProjectModelEnterprise` project. Base custom models on the plain names Calendar and TaskBoard
   export themselves (`EventModel`, `ResourceModel`, ...), not on Scheduler's.
+
+## License key
+
+Business and Enterprise run as a 14-day trial without a key (migration guide step 5). The app registers its key with
+`bryntum.licenseKey = '...'` before it creates the first component. Never invent a key: ask for it, or leave a marked
+placeholder. Community needs no key. A former `-trial` app moves to its tier package and stays a trial until a key is
+set.
 
 ## Imports: the product package no longer re-exports what it is built on
 
@@ -77,7 +87,7 @@ The owning packages arrive as dependencies of the product package. Add each one 
 - FontAwesome ships only in `@bryntum/core-<tier>/fontawesome/` (no `fontawesome/` in the product package).
 - Each product package has its structural sheet in two forms: `<product>.css` (includes Core, Grid, ... for a
   single-product app) and `<product>.thin.css` (that product only, for apps that combine products). Themes ship in
-  every package; the README imports them from `@bryntum/core-<tier>`.
+  every package; import the theme from the package of the highest product the app uses, as the README does.
 - No `.min.css` files. Rewrite every copy of Bryntum files that names the old package, `*.min.css` or
   `<product>/fontawesome/**`: a `postinstall` copy map, Angular `angular.json` `assets` globs, webpack copy plugins.
   Copy themes from the product package (identical to core's) and FontAwesome from `core-<tier>`.
@@ -88,7 +98,7 @@ The owning packages arrive as dependencies of the product package. Add each one 
 @import "@bryntum/core-enterprise/fontawesome/css/fontawesome.css";
 @import "@bryntum/core-enterprise/fontawesome/css/solid.css";
 @import "@bryntum/gantt-enterprise/gantt.css";
-@import "@bryntum/core-enterprise/svalbard-light.css";
+@import "@bryntum/gantt-enterprise/svalbard-light.css";
 ```
 
 ## Build
@@ -149,7 +159,8 @@ Also read the 8.0.0 changelogs' `[BREAKING]` / `[DEPRECATED]` entries: some chan
 | `smoothZoom` deprecated, never logs (smooth zoom is the default); `zoomFactor` 2 → 1.5 | `smoothZoom`, `zoomFactor` |
 | `amPm` preset → `sixHoursAndDay`; vendored `later.js` removed | `amPm`, `later.` |
 | `GridFeatureManager` removed (features use `Factoryable`) | `GridFeatureManager`, `registerFeature` |
-| Columns virtualized, `autoAddField` on, group rows indented, overscroll off, `detectEventBarLayoutIssues` on (new defaults) | always list under *Default behaviour changes* || Themes also ship as family sheets (`svalbard.css`), optional | theme `<link>` / `@import` |
+| Columns virtualized, `autoAddField` on, group rows indented, overscroll off, `detectEventBarLayoutIssues` on (new defaults) | always list under *Default behaviour changes* |
+| Themes also ship as family sheets (`svalbard.css`), optional | theme `<link>` / `@import` |
 | Product extras named in each guide (Gantt `toggleParentTasksOnClick`, Calendar DayView sticky content and YearView cells, renderer argument order, ...) | whatever the heading names |
 
 ### Time zone code

@@ -22,6 +22,7 @@ Blockers: none | <Vue 2 wrapper, Angular < 15, UMD, target not published> (stop 
   Files: `package.json`, lockfile · first update any `postinstall` script that copies Bryntum files
   For targets below 8.0, preserve trial aliases and use each target product's required `*-lib` / `*-lib-trial` versions for direct helper pins; for 8.x, remove obsolete direct helper dependencies.
 - [ ] **Imports and CSS paths** from the packed target package (owning package per class, FontAwesome, themes)
+- [ ] **For 8.x Business or Enterprise, register the license key** (`v7-to-v8.md`; ask for it, never invent one)
 
 ### <version> — <Product>
 - [ ] **<short title>** · risk: breaking | behaviour change | deprecation | cosmetic
