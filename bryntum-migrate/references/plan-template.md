@@ -56,8 +56,9 @@ Blockers: none | <Vue 2 wrapper, Angular < 15, UMD, target not published> (stop 
 - [ ] Grep for removed identifiers returns zero hits: …
 - [ ] Tests: `<command>` (if present)
 - [ ] Manual: open the app, the console has no errors, no `Deprecation warning` and no `CSS issues detected`
+- [ ] 8.x Business or Enterprise: no Trial badge and no license message once the key is set (both show until then)
 
 ## Unknowns for the user
-- Licence tier (8.x), theme choice (`v6-to-v7.md` for 6 → 7), anything the guides leave to the customer
+- Theme choice (`v6-to-v7.md` for 6 → 7), anything the guides leave to the customer (the 8.x licence tier and key go under *Unsure*)
 - …
 ````

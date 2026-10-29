@@ -42,12 +42,15 @@ have untiered placeholder packages without product code.
 
 **The tier is the customer's licence, so ask.** Every tier is on the public npm registry, so the registry can't tell
 you which one they bought. Put the question under *Unsure* in the plan, with the lowest tier the app needs. For
-Scheduler Pro, only confirm Enterprise.
+Scheduler Pro, only confirm Enterprise. A v7 licence holder who doesn't know their 8.0 tier confirms it with Bryntum
+sales (Core licensing guide, "Coming from v7").
 
-- Check what the app uses against the tier of each class in the packed target: `grep -rl "static tier = '" lib/`
-  lists the classes that need more than Community (for example Grid's `Group` feature is Business). A lower-tier
-  package doesn't contain higher-tier classes: an imported class fails the build, a feature enabled by config fails
-  at runtime (`Invalid type name`).
+- Check what the app uses against the tier of each class in the packed target:
+  `grep -rlE "static tier = '(business|enterprise)'" lib/` lists the classes that need more than Community (for
+  example Grid's `Group` feature is Business). A lower-tier package doesn't contain higher-tier classes: an imported
+  class fails the build, a feature enabled by config is skipped and a "Features unavailable on this tier" dialog
+  names the tier it needs, and a higher-tier feature that is on by default (Grid's `RowCopyPaste` is Business) is
+  silently off. Compare the baseline's `b-<feature>` classes.
 - Read the product's `guides/data/tiers.md` (docs-llm) for what each tier adds. Feature tiers are in `static tier`
   (Calendar also has `CalendarFeature.featureTiers`), widget and config tiers only in `@tier` source comments.
 - **Calendar and TaskBoard keep the basic data layer at every tier**, as in 7.x: their models and project resolve to
@@ -58,10 +61,15 @@ Scheduler Pro, only confirm Enterprise.
 
 ## License key
 
-Business and Enterprise run as a 14-day trial without a key (migration guide step 5). The app registers its key with
-`bryntum.licenseKey = '...'` before it creates the first component. Never invent a key: ask for it, or leave a marked
-placeholder. Community needs no key. A former `-trial` app moves to its tier package and stays a trial until a key is
-set.
+Business and Enterprise run as a 14-day trial without a key (migration guide step 5): a Trial badge, and a console
+message `No license key registered, the trial ends ...`. The app registers its key with `bryntum.licenseKey = '...'`
+in its entry file, before it creates the first component. That needs Core already loaded, since Core defines the
+`bryntum` global: in an app whose entry file doesn't import Bryntum (lazy routes, `lazy()` pages) it throws. The 8.0
+typings don't declare the global either (`Cannot find name 'bryntum'`). So in TypeScript, or with lazy loading,
+write `((globalThis as any).bryntum ??= {}).licenseKey = '...'` (drop `as any` in JavaScript); Core picks up a key
+set before it loads. Never invent a key: ask for it, or leave a marked placeholder. Paid keys are in the Bryntum
+Customer Zone, trial keys come from bryntum.com/download. Community needs no key. A former `-trial` app moves to its
+tier package and stays a trial until a key is set.
 
 ## Imports: the product package no longer re-exports what it is built on
 
@@ -87,7 +95,8 @@ The owning packages arrive as dependencies of the product package. Add each one 
 - FontAwesome ships only in `@bryntum/core-<tier>/fontawesome/` (no `fontawesome/` in the product package).
 - Each product package has its structural sheet in two forms: `<product>.css` (includes Core, Grid, ... for a
   single-product app) and `<product>.thin.css` (that product only, for apps that combine products). Themes ship in
-  every package; import the theme from the package of the highest product the app uses, as the README does.
+  every package as identical files; import the theme from the package of the highest product the app uses, as the
+  migration guide does (some package READMEs import the same file from `core-<tier>`).
 - No `.min.css` files. Rewrite every copy of Bryntum files that names the old package, `*.min.css` or
   `<product>/fontawesome/**`: a `postinstall` copy map, Angular `angular.json` `assets` globs, webpack copy plugins.
   Copy themes from the product package (identical to core's) and FontAwesome from `core-<tier>`.
@@ -159,7 +168,7 @@ Also read the 8.0.0 changelogs' `[BREAKING]` / `[DEPRECATED]` entries: some chan
 | `smoothZoom` deprecated, never logs (smooth zoom is the default); `zoomFactor` 2 → 1.5 | `smoothZoom`, `zoomFactor` |
 | `amPm` preset → `sixHoursAndDay`; vendored `later.js` removed | `amPm`, `later.` |
 | `GridFeatureManager` removed (features use `Factoryable`) | `GridFeatureManager`, `registerFeature` |
-| Columns virtualized, `autoAddField` on, group rows indented, overscroll off, `detectEventBarLayoutIssues` on (new defaults) | always list under *Default behaviour changes* |
+| Columns virtualized, `autoAddField` on, group rows indented, overscroll off, Scheduler's `detectEventBarLayoutIssues` on (new defaults) | always list under *Default behaviour changes* |
 | Themes also ship as family sheets (`svalbard.css`), optional | theme `<link>` / `@import` |
 | Product extras named in each guide (Gantt `toggleParentTasksOnClick`, Calendar DayView sticky content and YearView cells, renderer argument order, ...) | whatever the heading names |
 
